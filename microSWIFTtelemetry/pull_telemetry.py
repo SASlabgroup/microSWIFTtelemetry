@@ -20,6 +20,7 @@ __all__ = [
     "pull_telemetry_as_kml",
 ]
 
+import os
 from urllib.request import urlopen
 from urllib.parse import urlencode, quote_plus
 from io import BytesIO
@@ -164,8 +165,8 @@ def pull_telemetry_as_zip(
     response.close() 
     
     if localPath is None:
-        localPath = f'./microSWIFT{buoyID}.zip'
-
+        localPath = os.path.join(os.getcwd(), f'microSWIFT{buoyID}.zip')
+        
     with open(localPath, 'wb') as local:
         local.write(zippedFile)
         local.close()  
@@ -259,8 +260,7 @@ def pull_telemetry_as_kml(
     if localPath is None:
         startDateStr  = startDate.strftime('%Y-%m-%dT%H%M%S')
         endDateStr = endDate.strftime('%Y-%m-%dT%H%M%S')
-        localPath = f'./microSWIFT{buoyID}_{startDateStr}_to_{endDateStr}.kml'
-
+        localPath = os.path.join(os.getcwd(), f'microSWIFT{buoyID}_{startDateStr}_to_{endDateStr}.kml')
     with open(localPath, 'wb') as local:
             local.write(kmlFile)
     return
@@ -273,16 +273,16 @@ if __name__ == "__main__":
     end = datetime.utcnow()
     buoyID = '019'
 
-    SWIFT_json = pull_telemetry_as_json(buoyID = buoyID, startDate = start, endDate= end)
-    print(SWIFT_json)
+    # SWIFT_json = pull_telemetry_as_json(buoyID = buoyID, startDate = start, endDate= end)
+    # print(SWIFT_json)
 
-    SWIFT_dict = pull_telemetry_as_var(buoyID = buoyID, startDate = start, endDate= end, varType = 'dict')
-    print(SWIFT_dict.keys())
+    # SWIFT_dict = pull_telemetry_as_var(buoyID = buoyID, startDate = start, endDate= end, varType = 'dict')
+    # print(SWIFT_dict.keys())
 
-    SWIFT_df = pull_telemetry_as_var(buoyID, datetime(2022,9,26), varType = 'pandas')
+    # SWIFT_df = pull_telemetry_as_var(buoyID, datetime(2022,9,26), varType = 'pandas')
 
-    SWIFT_df = pull_telemetry_as_var(buoyID = buoyID, startDate = start, endDate= end, varType = 'pandas')
-    print(SWIFT_df.info())
+    # SWIFT_df = pull_telemetry_as_var(buoyID = buoyID, startDate = start, endDate= end, varType = 'pandas')
+    # print(SWIFT_df.info())
 
     # TODO:
     # SWIFT_ds = pull_telemetry_as_var(buoyID = buoyID, startDate = start, endDate= end, varType = 'xarray')

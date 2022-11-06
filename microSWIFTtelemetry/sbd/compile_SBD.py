@@ -20,9 +20,6 @@ from pandas import DataFrame, to_datetime
 from typing import Any
 from microSWIFTtelemetry.sbd.read_SBD import read_SBD
 
-
-
-
 def to_pandas_datetime_index(
     df: DataFrame,
     datetimeColumnName: str = 'datetime',
@@ -96,11 +93,12 @@ def compile_SBD(
         for file in SBDfolder.namelist():
             data.append(read_SBD(SBDfolder.open(file)))
 
-    else: #TODO: support reading from a folder of SBDs?
-        for SBDfile in SBDfolder: 
-            with open(SBDfile, mode='rb') as file: # b is important -> binary
-                # fileContent = file.read()
-                data.append(read_SBD(file))
+    else: #TODO: support reading from a folder of SBDs
+        raise Exception('Reading from a folder on the local machine is not supported yet.')
+        # for SBDfile in SBDfolder: 
+        #     with open(SBDfile, mode='rb') as file: # b is important -> binary
+        #         # fileContent = file.read()
+        #         data.append(read_SBD(file))
 
     if varType == 'dict':
         d = {k: [d.get(k) for d in data] for k in set().union(*data)}
@@ -113,8 +111,9 @@ def compile_SBD(
             to_pandas_datetime_index(df)
         return df
 
-    elif varType == 'xarray':
+    elif varType == 'xarray': #TODO: support for xarray
         import xarray
-        raise Exception('incomplete') #TODO:
+        raise Exception('incomplete') 
+        
     else:
         raise ValueError("varType can only be 'dict', 'pandas', or 'xarray'")
