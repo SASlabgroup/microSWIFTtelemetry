@@ -7,6 +7,12 @@ It contains collection of python functions for accessing data from the UW-APL SW
 
 See [examples/](https://github.com/jacobrdavis/microSWIFTtelemetry/tree/main/examples) for usage.
 
+## Installation
+The latest release of `microSWIFTtelemetry` can be installed from PyPI using pip: 
+
+```
+$ pip install microSWIFTtelemetry
+```
 ## Organization
 ```
 microSWIFTtelemetry/
