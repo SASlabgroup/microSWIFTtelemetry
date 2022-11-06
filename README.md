@@ -19,9 +19,6 @@ microSWIFTtelemetry/
 ├── microSWIFTtelemetry/
 │   ├── __init__.py
 │   ├── pull_telemetry.py
-│   ├── analytics/
-│   │   ├── __init__.py
-│   │   └── telemetry_analytics.py
 │   ├── sbd/
 │   │   ├── __init__.py
 │   │   ├── compile_SBD.py
