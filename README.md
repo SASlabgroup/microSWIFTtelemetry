@@ -5,7 +5,7 @@ It contains collection of python functions for accessing data from the UW-APL SW
 [http://swiftserver.apl.washington.edu/](http://swiftserver.apl.washington.edu/) (base URL)\
 [http://faculty.washington.edu/jmt3rd/SWIFTdata/DynamicDataLinks.html](http://faculty.washington.edu/jmt3rd/SWIFTdata/DynamicDataLinks.html) (HTML page)
 
-See examples/ for usage.
+See `examples/` for usage.
 
 ## Organization
 ```
