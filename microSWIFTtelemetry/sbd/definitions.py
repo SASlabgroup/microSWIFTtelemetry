@@ -1,14 +1,5 @@
 """
-Author: @jacobrdavis
-
-microSWIFT sensor type and variable definitions.
-
-Contents:
-    - get_sensor_type_definition()
-    - get_variable_definitions()
-
-Log:
-    - 2022-10-27, J.Davis: created
+Module containing microSWIFT sensor type and variable definitions.
 """
 __all__ = [
     "get_sensor_type_definition",

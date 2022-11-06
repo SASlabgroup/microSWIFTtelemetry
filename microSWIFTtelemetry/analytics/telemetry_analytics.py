@@ -1,6 +1,5 @@
 """
 Analytic tools for evaluating telemetry performance
-
 """
 
 __all__ = [
@@ -12,7 +11,6 @@ __all__ = [
     "create_telemetry_report_figure",
 ]
 
-from typing import Iterable
 from microSWIFTtelemetry.pull_telemetry import pull_telemetry_as_json, pull_telemetry_as_var
 from datetime import datetime, timezone, timedelta, tzinfo
 import pandas as pd
@@ -21,10 +19,19 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 #%%
 def find_full_range(
-    X1: np.array,
-    X2: np.array,
+    X1: np.ndarray,
+    X2: np.ndarray,
 )-> tuple:
-    #TODO: doctstr
+    """
+    Compare two arrays of datetimes to determine the full range of their union.
+
+    Arguments:
+        - X1 (np.ndarray), first array of datetimes
+        - X2 (np.ndarray), second array of datetimes
+
+    Returns:
+        - (tuple), range of union(X1,X2)
+    """
     x_min = min([X1.min(), X2.min()])
     x_max = max([X1.max(), X2.max()])
     return (x_min, x_max)
@@ -34,7 +41,18 @@ def date_range(
     end: datetime, 
     msgPerHr: float,
 )-> pd.DatetimeIndex:
-    #TODO:
+    """
+    Helper function for generating a date range with a frequency corresponding
+    to the number of telemetered messages per hour.
+
+    Arguments:
+        - start (datetime), start of date range
+        - end (datetime), end of date range
+        - msgPerHr (float), messages per hour
+
+    Returns:
+        - (pd.DatetimeIndex), date range with frequency of msgPerHr
+    """
     dateRange = pd.date_range(
         start, 
         end, 
@@ -43,13 +61,27 @@ def date_range(
     ) 
     return dateRange
 
-def get_timestamps(buoyID, start, end):
+def get_timestamps(
+    buoyID: str,
+    startDate: datetime,
+    endDate: datetime = datetime.utcnow(),
+):
+    """
+    TODO: _summary_
 
-    SWIFT_json = pull_telemetry_as_json(buoyID = buoyID, startDate = start, endDate = end)
+    Arguments:
+        - buoyID (_type_), _description_
+        - start (_type_), _description_
+        - end (_type_), _description_
+
+    Returns:
+        - (_type_), _description_
+    """
+    SWIFT_json = pull_telemetry_as_json(buoyID = buoyID, startDate = startDate, endDate = endDate)
     serverTimestamps = [msg['timestamp'] for msg in SWIFT_json['buoys'][0]['data']]
     serverTimestamps = pd.to_datetime(serverTimestamps, format='%Y-%m-%dT%H:%M:%S%Z') # datetime.strptime(serverTimes[0], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc)
 
-    SWIFT_dict = pull_telemetry_as_var(buoyID = buoyID, startDate = start, endDate = end, varType = 'dict')
+    SWIFT_dict = pull_telemetry_as_var(buoyID = buoyID, startDate = startDate, endDate = endDate, varType = 'dict')
     onboardTimestamps = SWIFT_dict['datetime']
 
     return serverTimestamps, onboardTimestamps

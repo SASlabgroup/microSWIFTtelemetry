@@ -1,13 +1,5 @@
 """
-Author: @jacobrdavis
-
-A collection of python functions for compiling microSWIFT short burst data (SBD) files.
-
-Log:
-    - 2022-09-06, J.Davis: created
-    - 2022-09-12, J.Davis: updated doc strs, convert dataframe index to datetime index
-    - 2022-09-16, J.Davis: added dict sorting with sort_dict()
-
+Module for compiling microSWIFT short burst data (SBD) files.
 """
 __all__ = [
     "to_pandas_datetime_index",
@@ -114,6 +106,6 @@ def compile_SBD(
     elif varType == 'xarray': #TODO: support for xarray
         import xarray
         raise Exception('incomplete') 
-        
+
     else:
         raise ValueError("varType can only be 'dict', 'pandas', or 'xarray'")

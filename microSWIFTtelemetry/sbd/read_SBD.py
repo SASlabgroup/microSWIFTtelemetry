@@ -1,17 +1,5 @@
 """
-Author: @jacobrdavis
-
-A collection of python functions for reading microSWIFT short burst data (SBD) files.
-
-Contents:
-    - get_sensor_type()
-    - unpack_SBD()
-    - read_SBD()
-
-Log:
-    - 2022-09-06, J.Davis: created
-    - 2022-09-12, J.Davis: updated doc strs
-    - 2022-10-27, J.Davis: moved sensor type and payload def to definitions.py
+Module for reading microSWIFT short burst data (SBD) files.
 """
 import struct
 import numpy as np

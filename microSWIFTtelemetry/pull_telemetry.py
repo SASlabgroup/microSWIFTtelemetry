@@ -1,16 +1,5 @@
 """
-Author: @jacobrdavis
-
-A collection of python functions for accessing data from the UW-APL SWIFT server:
-http://swiftserver.apl.washington.edu/ (base URL)
-http://faculty.washington.edu/jmt3rd/SWIFTdata/DynamicDataLinks.html (HTML page)
-
-See pull_telemetry_example.ipynb for a complete tutorial.
-
-Log:
-    - 2022-09-06, J.Davis: created
-    - 2022-09-12, J.Davis: updated doc strs, added datetime indexing to dataframes, requirements.txt
-
+Core module for accessing microSWIFT data from the UW-APL SWIFT server.
 """
 __all__ = [
     "create_request",
@@ -74,7 +63,7 @@ def pull_telemetry_as_var(
     startDate: datetime,
     endDate: datetime = datetime.utcnow(),
     varType: str = 'dict',
-)-> Union[List[dict], DataFrame]: # DataArray
+)-> Union[List[dict], DataFrame, DataArray]:
     """
     Query the SWIFT server for microSWIFT data over a specified date range and 
     return an object in memory. Note the `.zip` file of short burst data (SBD) messages
@@ -266,28 +255,3 @@ def pull_telemetry_as_kml(
     return
 
 
-if __name__ == "__main__":
-
-    # Run examples:
-    start = datetime(2022,9,26,0,0,0)
-    end = datetime.utcnow()
-    buoyID = '019'
-
-    # SWIFT_json = pull_telemetry_as_json(buoyID = buoyID, startDate = start, endDate= end)
-    # print(SWIFT_json)
-
-    # SWIFT_dict = pull_telemetry_as_var(buoyID = buoyID, startDate = start, endDate= end, varType = 'dict')
-    # print(SWIFT_dict.keys())
-
-    # SWIFT_df = pull_telemetry_as_var(buoyID, datetime(2022,9,26), varType = 'pandas')
-
-    # SWIFT_df = pull_telemetry_as_var(buoyID = buoyID, startDate = start, endDate= end, varType = 'pandas')
-    # print(SWIFT_df.info())
-
-    # TODO:
-    # SWIFT_ds = pull_telemetry_as_var(buoyID = buoyID, startDate = start, endDate= end, varType = 'xarray')
-    # print(SWIFT_ds)
-
-    pull_telemetry_as_zip(buoyID = buoyID, startDate = start, endDate= end)
-
-    pull_telemetry_as_kml(buoyID = buoyID, startDate = start, endDate= end)
