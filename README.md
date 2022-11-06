@@ -1,11 +1,27 @@
 # microSWIFTtelemetry
 microSWIFTtelemetry provides Python-based functionality for pulling telemetry from the microSWIFT wave buoy developed at the University of Washington Applied Physics Laboratory (UW-APL). 
 
-It contains collection of python functions for accessing data from the UW-APL SWIFT server:\
-[http://swiftserver.apl.washington.edu/](http://swiftserver.apl.washington.edu/) (base URL)\
-[http://faculty.washington.edu/jmt3rd/SWIFTdata/DynamicDataLinks.html](http://faculty.washington.edu/jmt3rd/SWIFTdata/DynamicDataLinks.html) (HTML page)
+It contains collection of python functions for programmatically accessing and compiling data from the UW-APL SWIFT server at [http://swiftserver.apl.washington.edu/](http://swiftserver.apl.washington.edu/) (base URL).
 
 See [examples/](https://github.com/jacobrdavis/microSWIFTtelemetry/tree/main/examples) for usage.
+
+
+
+
+
+---
+**NOTE:**
+
+Please note this package is only developed to work with microSWIFTs and not the larger SWIFT buoys. 
+For a MALTAB-based implementation that works for the entire suite of SWIFTs, see `SWIFT-codes` and the `pullSWIFTtelemetry.m` function at [https://github.com/SASlabgroup/SWIFT-codes/blob/master/GeneralTools/pullSWIFTtelemetry.m](https://github.com/SASlabgroup/SWIFT-codes/blob/master/GeneralTools/pullSWIFTtelemetry.m).
+
+The server can also be queryed and explored using the web page and web-based map: 
+* [http://faculty.washington.edu/jmt3rd/SWIFTdata/DynamicDataLinks.html](http://faculty.washington.edu/jmt3rd/SWIFTdata/DynamicDataLinks.html) (web page)
+* [https://swiftserver.apl.washington.edu/map/](https://swiftserver.apl.washington.edu/map/) (map)
+
+
+---
+
 
 ## Installation
 The latest release of `microSWIFTtelemetry` can be installed from PyPI using pip: 
