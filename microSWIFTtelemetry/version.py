@@ -34,7 +34,7 @@ microSWIFTtelemetry
 ===================
 Python-based functionality for pulling telemetry from the microSWIFT wave buoy.
 
-.. _README: https://github.com/jacobrdavis/microSWIFTtelemetry/blob/main/README.md
+.. _README: https://github.com/SASlabgroup/microSWIFTtelemetry/blob/main/README.md
 
 License
 =======
