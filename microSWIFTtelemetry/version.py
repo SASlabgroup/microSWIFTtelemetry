@@ -31,7 +31,7 @@ description = "microSWIFTtelemetry: Python-based functionality for pulling telem
 long_description = """
 
 microSWIFTtelemetry
-========
+===================
 Python-based functionality for pulling telemetry from the microSWIFT wave buoy.
 
 .. _README: https://github.com/jacobrdavis/microSWIFTtelemetry/blob/main/README.md
@@ -52,6 +52,7 @@ MAINTAINER = "Jacob Davis"
 MAINTAINER_EMAIL = "davisjr@uw.edu"
 DESCRIPTION = description
 LONG_DESCRIPTION = long_description
+LONG_DESCRIPTION_CONTENT_TYPE = "text/markdown"
 URL = "https://github.com/jacobrdavis/microSWIFTtelemetry" #TODO: change to SASgroup
 DOWNLOAD_URL = ""
 LICENSE = "MIT"
