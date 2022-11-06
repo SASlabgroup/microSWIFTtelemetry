@@ -1,6 +1,9 @@
 # mac stuff
 .DS_Store
 
+# notes
+dev_notes.md
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
