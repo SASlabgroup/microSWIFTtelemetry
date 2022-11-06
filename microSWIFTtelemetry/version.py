@@ -26,19 +26,19 @@ CLASSIFIERS = [
 ]
 
 # Description should be a one-liner:
-description = "LittleBuoyBigWaves: Data exploration and analysis tools intended for use with small, drifting wave buoys."
+description = "microSWIFTtelemetry: Python-based functionality for pulling telemetry from the microSWIFT wave buoy."
 # Long description will go up on the pypi page
 long_description = """
 
-LittleBuoyBigWaves
+microSWIFTtelemetry
 ========
-Data exploration and analysis tools intended for use with small, drifting wave buoys. 
+Python-based functionality for pulling telemetry from the microSWIFT wave buoy.
 
-.. _README: https://github.com/jacobrdavis/LittleBuoyBigWaves/blob/main/README.md
+.. _README: https://github.com/jacobrdavis/microSWIFTtelemetry/blob/main/README.md
 
 License
 =======
-``littlebuoybigwaves`` is licensed under the terms of the MIT license. See the file
+``microSWIFTtelemetry`` is licensed under the terms of the MIT license. See the file
 "LICENSE" for information on the history of this software, terms & conditions
 for usage, and a DISCLAIMER OF ALL WARRANTIES.
 
@@ -47,12 +47,12 @@ All trademarks referenced herein are property of their respective holders.
 Copyright (c) 2022--, Jacob Davis, University of Washington
 """
 
-NAME = "littlebuoybigwaves"
+NAME = "microSWIFTtelemetry"
 MAINTAINER = "Jacob Davis"
 MAINTAINER_EMAIL = "davisjr@uw.edu"
 DESCRIPTION = description
 LONG_DESCRIPTION = long_description
-URL = "https://github.com/jacobrdavis/LittleBuoyBigWaves"
+URL = "https://github.com/jacobrdavis/microSWIFTtelemetry" #TODO: change to SASgroup
 DOWNLOAD_URL = ""
 LICENSE = "MIT"
 AUTHOR = "Jacob Davis"
@@ -62,21 +62,12 @@ MAJOR = _version_major
 MINOR = _version_minor
 MICRO = _version_micro
 VERSION = __version__
-PACKAGE_DATA = {'littlebuoybigwaves': [pjoin('data', '*')]} # or {'': ['data/x', 'data/x']}
+PACKAGE_DATA = {'microSWIFTtelemetry': [pjoin('data', '*')]} # or {'': ['data/x', 'data/x']}
 REQUIRES = [
-    "boto3"
-    "botocore"
-    "cdsapi"
-    "cfgrib"
-    "matplotlib"
-    "Nio"
-    "numpy"
-    "pandas"
-    "pygrib"
-    "python_dateutil"
-    "seaborn"
-    "wget"
-    "xarray"
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "xarray",
 ]
 PYTHON_REQUIRES = ">= 3.7"
 
