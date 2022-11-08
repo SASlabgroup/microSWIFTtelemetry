@@ -27,7 +27,7 @@ The server can also be queryed and explored using the web page and web-based map
 The latest release of `microSWIFTtelemetry` can be installed from PyPI using pip: 
 
 ```
-$ pip install microSWIFTtelemetry
+pip install microSWIFTtelemetry
 ```
 ## Organization
 ```
