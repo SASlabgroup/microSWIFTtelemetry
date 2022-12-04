@@ -1,22 +1,26 @@
 """
 Module containing microSWIFT sensor type and variable definitions.
 """
+
 __all__ = [
     "get_sensor_type_definition",
     "get_variable_definitions",
 ]
+
 from typing import List, Tuple
 
-def get_sensor_type_definition(sensorType: int) -> str:
+def get_sensor_type_definition(sensor_type: int) -> str:
     """
-    Dictionary of microSWIFT sensor type definitions; see https://github.com/alexdeklerk/microSWIFT.
+    Dictionary of microSWIFT sensor type definitions;
+    see https://github.com/alexdeklerk/microSWIFT.
 
     Arguments:
-        - sensorType (int), sensor type defintion to return
+        - sensor_type (int), sensor type defintion to return
 
     Raises:
-        - ValueError, raise error if the sensor type is not one of the types 
-          defined in microSWIFT.py and configured to be parsed on the sever.
+        - ValueError, raise error if the sensor type is not one of the
+                types defined in microSWIFT.py and configured to be
+                parsed on the sever.
 
     Returns:
         - (str), sensor type defintion in Python's struct module format
@@ -24,21 +28,22 @@ def get_sensor_type_definition(sensorType: int) -> str:
     """
 
     # Define the sensor type using Python's struct module format
-    payloadDef = {
+    PAYLOAD_DEFINITIONS = {
         50 : '<sbbhfff42f42f42f42f42f42f42ffffffffiiiiii',
         51 : '<sbbhfff42fffffffffffiiiiii',
         52 : '<sbbheee42eee42b42b42b42b42Bffeeef',
     }
-    
-    if sensorType not in payloadDef.keys():
-        raise ValueError(f"sensorType not defined - can only be value in: {list(payloadDef.keys())}")
-    
-    return payloadDef[sensorType]
+
+    if sensor_type not in PAYLOAD_DEFINITIONS.keys():
+        raise ValueError((f'sensor_type not defined - can only be value in:'
+                          f'{list(PAYLOAD_DEFINITIONS.keys())}'))
+
+    return PAYLOAD_DEFINITIONS[sensor_type]
 
 def get_variable_definitions() -> List[Tuple]:
     """
     microSWIFT variable definitions.
-    
+
     Returns:
         - (List[Tuple]), microSWIFT variable definitions with format:
             [
@@ -46,7 +51,7 @@ def get_variable_definitions() -> List[Tuple]:
                 :             :          :
             ]
     """
-    microSWIFTvars = [
+    VARIABLE_DEFINITIONS = [
         ('datetime', "native Python datetime.datetime", "(datetime)"),
         ('Hs', "significant wave height", "(m)"),
         ('Tp', "peak period", "(s) "),
@@ -64,9 +69,9 @@ def get_variable_definitions() -> List[Tuple]:
         ('lat', "mean GPS latitude", "(decimal degrees)"),
         ('lon', "mean GPS longitude", "(decimal degrees)"),
         ('temp', "mean temperature", "(C)"),
-        ('salinity', "mean salinity", "(psu)"), 
+        ('salinity', "mean salinity", "(psu)"),
         ('volt', "mean battery voltage", "(V)"),
-        ('sensorType', "Iridium sensor type definition", "(-)"),
+        ('sensor_type', "Iridium sensor type definition", "(-)"),
     ]
 
-    return microSWIFTvars
+    return VARIABLE_DEFINITIONS
