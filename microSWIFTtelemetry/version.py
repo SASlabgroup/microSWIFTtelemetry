@@ -4,7 +4,7 @@ from os.path import join as pjoin
 # Format expected by setup.py and doc/source/conf.py: string of form "X.Y.Z"
 _version_major = 0
 _version_minor = 1
-_version_micro = ''  # use '' for first of series, number for 1 and above
+_version_micro = 2  # use '' for first of series, number for 1 and above
 # _version_extra = 'dev'
 _version_extra = ''  #TODO: Uncomment this for full releases
 
@@ -34,7 +34,7 @@ microSWIFTtelemetry
 ===================
 Python-based functionality for pulling telemetry from the microSWIFT wave buoy.
 
-.. _README: https://github.com/jacobrdavis/microSWIFTtelemetry/blob/main/README.md
+.. _README: https://github.com/SASlabgroup/microSWIFTtelemetry/blob/main/README.md
 
 License
 =======
@@ -53,7 +53,7 @@ MAINTAINER_EMAIL = "davisjr@uw.edu"
 DESCRIPTION = description
 LONG_DESCRIPTION = long_description
 LONG_DESCRIPTION_CONTENT_TYPE = "text/markdown"
-URL = "https://github.com/jacobrdavis/microSWIFTtelemetry" #TODO: change to SASgroup
+URL = "https://github.com/SASlabgroup/microSWIFTtelemetry"
 DOWNLOAD_URL = ""
 LICENSE = "MIT"
 AUTHOR = "Jacob Davis"
