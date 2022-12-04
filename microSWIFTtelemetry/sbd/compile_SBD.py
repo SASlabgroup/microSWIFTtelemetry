@@ -10,7 +10,7 @@ __all__ = [
 import numpy as np
 from pandas import DataFrame, to_datetime
 from typing import Any
-from microSWIFTtelemetry.sbd.read_SBD import read_SBD
+from microSWIFTtelemetry.sbd.read_sbd import read_SBD
 
 def to_pandas_datetime_index(
     df: DataFrame,

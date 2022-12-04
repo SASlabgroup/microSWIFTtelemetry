@@ -1,121 +1,118 @@
 """
 Module for reading microSWIFT short burst data (SBD) files.
 """
+
 import struct
-import numpy as np
 from datetime import datetime, timezone
-from microSWIFTtelemetry.sbd.definitions import get_sensor_type_definition, get_variable_definitions
+
+import numpy as np
+
+from microSWIFTtelemetry.sbd.definitions import get_sensor_type_definition
+from microSWIFTtelemetry.sbd.definitions import get_variable_definitions
 
 
-
-def get_sensor_type(fileContent: bytes) -> int:
+def get_sensor_type(file_content: bytes) -> int:
     """
     Helper function to determine sensor type from an SBD message.
 
     Arguments:
-        - fileContent (bytes), binary SBD message
+        - file_content (bytes), binary SBD message
 
     Returns:
         - (int), int corresponding to sensor type
     """
-    payloadStartIdx = 0 # (no header) otherwise it is: = payload_data.index(b':') 
-    sensorType = ord(fileContent[payloadStartIdx+1:payloadStartIdx+2]) # sensor type is stored 1 byte after the header
-    return sensorType
+    payload_start= 0 # (no header) otherwise it is: = payload_data.index(b':')
+    sensor_type = ord(file_content[payload_start+1:payload_start+2])
+    return sensor_type
 
-def unpack_SBD(fileContent: bytes) -> dict:
+def unpack_sbd(file_content: bytes) -> dict:
     """
-    Unpack short burst data messages using formats defined in the sensor type
-    payload definitions.
+    Unpack short burst data messages using formats defined in the sensor
+    type payload definitions.
 
     Arguments:
-        - fileContent (bytes), binary SBD message
+        - file_content (bytes), binary SBD message
 
     Returns:
         - (dict), microSWIFT variables stored in a temporary dictionary
     """
-    sensorType = get_sensor_type(fileContent)
+    sensor_type = get_sensor_type(file_content)
+    payload_struct = get_sensor_type_definition(sensor_type) #['struct']
+    data = struct.unpack(payload_struct, file_content)
 
-    payloadStruct = get_sensor_type_definition(sensorType) #['struct']
-   
-    data = struct.unpack(payloadStruct, fileContent)
+    swift = {var[0] : None for var in get_variable_definitions()}
 
-    SWIFT = {var[0] : None for var in get_variable_definitions()}
-    
-    if sensorType == 50:
+    if sensor_type == 50:
         #TODO:
-        print('sensorType 50 is not yet supported')
+        print('sensor_type 50 is not yet supported')
 
-    elif sensorType == 51:
+    elif sensor_type == 51:
         payload_size = data[3]
-        SWIFT['Hs'] = data[4]
-        SWIFT['Tp'] = data[5]
-        SWIFT['Dp'] = data[6]
-        SWIFT['E']  = np.asarray(data[7:49])
+        swift['Hs'] = data[4]
+        swift['Tp'] = data[5]
+        swift['Dp'] = data[6]
+        swift['E']  = np.asarray(data[7:49])
         fmin = data[49]
         fmax = data[50]
         fstep = data[51]
         if fmin != 999 and fmax != 999:
-            SWIFT['f'] = np.arange(fmin, fmax + fstep, fstep)
+            swift['f'] = np.arange(fmin, fmax + fstep, fstep)
         else:
-            SWIFT['f'] = 999*np.ones(np.shape(SWIFT['E']))
-        SWIFT['lat'] = data[52]
-        SWIFT['lon'] = data[53]
-        SWIFT['temp'] = data[54]
-        SWIFT['volt'] = data[55]
-        SWIFT['uMean'] = data[56]
-        SWIFT['vMean'] = data[57]
-        SWIFT['zMean'] = data[58]
-        year = data[59]
-        month = data[60]
-        day = data[61]
-        hour = data[62]
-        min = data[63]
-        sec = data[64]
-        SWIFT['datetime'] = datetime(year, month, day, hour, min, sec, tzinfo=timezone.utc)  
-        SWIFT['sensorType'] = sensorType
+            swift['f'] = 999*np.ones(np.shape(swift['E']))
+        swift['lat'] = data[52]
+        swift['lon'] = data[53]
+        swift['temp'] = data[54]
+        swift['volt'] = data[55]
+        swift['uMean'] = data[56]
+        swift['vMean'] = data[57]
+        swift['zMean'] = data[58]
+        swift['datetime'] = datetime(year=data[59],
+                                     month=data[60],
+                                     day=data[61],
+                                     hour=data[62],
+                                     minute=data[63],
+                                     second=data[64],
+                                     tzinfo=timezone.utc)
+        swift['sensor_type'] = sensor_type
 
-    elif sensorType == 52:
+    elif sensor_type == 52:
         payload_size = data[3]
-        SWIFT['Hs'] = data[4]
-        SWIFT['Tp'] = data[5]
-        SWIFT['Dp'] = data[6]
-        SWIFT['E']  = np.asarray(data[7:49])
+        swift['Hs'] = data[4]
+        swift['Tp'] = data[5]
+        swift['Dp'] = data[6]
+        swift['E']  = np.asarray(data[7:49])
         fmin = data[49]
         fmax = data[50]
         if fmin != 999 and fmax != 999:
-            fstep = (fmax - fmin)/(len(SWIFT['E'])-1)
-            SWIFT['f'] = np.arange(fmin, fmax + fstep, fstep)
+            fstep = (fmax - fmin)/(len(swift['E'])-1)
+            swift['f'] = np.arange(fmin, fmax + fstep, fstep)
         else:
-            SWIFT['f'] = 999*np.ones(np.shape(SWIFT['E']))
-        SWIFT['a1'] = np.asarray(data[51:93])/100
-        SWIFT['b1'] = np.asarray(data[93:135])/100
-        SWIFT['a2'] = np.asarray(data[135:177])/100
-        SWIFT['b2'] = np.asarray(data[177:219])/100
-        SWIFT['check'] = np.asarray(data[219:261])/10
-        SWIFT['lat'] = data[261]
-        SWIFT['lon'] = data[262]
-        SWIFT['temp'] = data[263]
-        SWIFT['salinity'] = data[264]
-        SWIFT['volt'] = data[265]
-        nowEpoch = data[266]
-        SWIFT['datetime'] = datetime.fromtimestamp(nowEpoch, tz=timezone.utc)  
-        SWIFT['sensorType'] = sensorType
+            swift['f'] = 999*np.ones(np.shape(swift['E']))
+        swift['a1'] = np.asarray(data[51:93])/100
+        swift['b1'] = np.asarray(data[93:135])/100
+        swift['a2'] = np.asarray(data[135:177])/100
+        swift['b2'] = np.asarray(data[177:219])/100
+        swift['check'] = np.asarray(data[219:261])/10
+        swift['lat'] = data[261]
+        swift['lon'] = data[262]
+        swift['temp'] = data[263]
+        swift['salinity'] = data[264]
+        swift['volt'] = data[265]
+        now_epoch = data[266]
+        swift['datetime'] = datetime.fromtimestamp(now_epoch, tz=timezone.utc)
+        swift['sensor_type'] = sensor_type
 
-    return SWIFT
+    return swift
 
-def read_SBD(SBDfile: str) -> dict: #, fromMemory: bool = False):
+def read_sbd(sbd_file: str) -> dict:
     """
     Read microSWIFT short burst data messages.
 
     Arguments:
-        - SBDfile (str), path to .sbd file
+        - sbd_file (str), path to .sbd file
 
     Returns:
         - (dict), microSWIFT variables stored in a temporary dictionary
     """
-
-    fileContent = SBDfile.read()
-
-    return unpack_SBD(fileContent)
-
-
+    file_content = sbd_file.read()
+    return unpack_sbd(file_content)
