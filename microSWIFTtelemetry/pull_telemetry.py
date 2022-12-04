@@ -21,7 +21,7 @@ from zipfile import ZipFile
 from io import BytesIO
 from pandas import DataFrame
 from xarray import DataArray
-from microSWIFTtelemetry.sbd.compile_sbd import compile_SBD
+from microSWIFTtelemetry.sbd.compile_sbd import compile_sbd
 
 
 def create_request(
@@ -115,7 +115,7 @@ def pull_telemetry_as_var(
     response.close()
 
     # Compile SBD messages into specified variable and return:
-    return compile_SBD(zipped_file, var_type, fromMemory = True)
+    return compile_sbd(zipped_file, var_type, fromMemory = True)
 
 
 def pull_telemetry_as_zip(
