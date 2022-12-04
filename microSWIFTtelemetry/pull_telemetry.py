@@ -21,7 +21,7 @@ from zipfile import ZipFile
 from io import BytesIO
 from pandas import DataFrame
 from xarray import DataArray
-from microSWIFTtelemetry.sbd.compile_SBD import compile_SBD
+from microSWIFTtelemetry.sbd.compile_sbd import compile_SBD
 
 
 def create_request(
