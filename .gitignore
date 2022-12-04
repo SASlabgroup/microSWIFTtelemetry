@@ -4,6 +4,9 @@
 # notes
 dev_notes.md
 
+#vscode
+.vscode
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

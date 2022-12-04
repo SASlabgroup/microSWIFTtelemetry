@@ -1,4 +1,27 @@
-# import microSWIFTtelemetry as telem
+""" Testing of core knn functions """
+import unittest
+import microSWIFTtelemetry as telemetry
+
+class TestMicroSWIFTtelemetry(unittest.TestCase):
+
+    # def test_correct_length(self):
+    #     """ 
+    #     Smoke test that checks for runtime errors and proper output length.
+    #     """
+    #     data = np.array([[0, 1, 2, 3],
+    #                      [0, 1, 2, 3],
+    #                      [0, 1, 2, 3],
+    #                      [0, 1, 2, 3],
+    #                      [0, 1, 2, 3]])
+
+    #     query = np.array([0, 0, 0, 0])
+        
+    #     self.assertEqual(
+    #         len(euclidean_distance(data, query)), 
+    #         data.shape[0],
+    #     )
+
+
 
  # Run examples:
 #  start = datetime(2022,9,26,0,0,0)

@@ -11,12 +11,15 @@ __all__ = [
     "create_telemetry_report_figure",
 ]
 
-from microSWIFTtelemetry.pull_telemetry import pull_telemetry_as_json, pull_telemetry_as_var
-from datetime import datetime, timezone, timedelta, tzinfo
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import numpy as np
+import pandas as pd
+
+from datetime import datetime, timezone, timedelta
+from microSWIFTtelemetry.pull_telemetry import pull_telemetry_as_json, pull_telemetry_as_var
+
+
 #%%
 def find_full_range(
     X1: np.ndarray,
