@@ -1,8 +1,14 @@
+# project-specific
+# microSWIFTtelemetry/analytics
+
 # mac stuff
 .DS_Store
 
 # notes
 dev_notes.md
+
+#vscode
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
