@@ -1,3 +1,7 @@
+[![PyPI](https://img.shields.io/pypi/v/microSWIFTtelemetry)](https://pypi.org/project/microSWIFTtelemetry/)
+[![Python Package using Conda](https://github.com/SASlabgroup/microSWIFTtelemetry/actions/workflows/python-package-conda.yml/badge.svg)](https://github.com/SASlabgroup/microSWIFTtelemetry/actions/workflows/python-package-conda.yml)
+[![GitHub license](https://img.shields.io/github/license/SASlabgroup/microSWIFTtelemetry)](https://github.com/SASlabgroup/microSWIFTtelemetry/blob/main/LICENSE)
+
 # microSWIFTtelemetry
 microSWIFTtelemetry provides Python-based functionality for pulling telemetry from the microSWIFT wave buoy developed at the University of Washington Applied Physics Laboratory (UW-APL). 
 
