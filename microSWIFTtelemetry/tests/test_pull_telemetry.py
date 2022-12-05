@@ -15,10 +15,13 @@ from unittest.mock import Mock, patch
 import numpy as np
 import pandas as pd
 
-#TODO: import microSWIFTtelemetry as telemetry
-import microSWIFTtelemetry.pull_telemetry as telemetry
+import microSWIFTtelemetry as telemetry
 import microSWIFTtelemetry.sbd as sbd
 from microSWIFTtelemetry.sbd.definitions import get_variable_definitions
+
+# import microSWIFTtelemetry.pull_telemetry as telemetry
+# import microSWIFTtelemetry.sbd as sbd
+# from microSWIFTtelemetry.sbd.definitions import get_variable_definitions
 
 class TestPullTelemetry(unittest.TestCase):
     """ Unit tests for pull_telemetry.py """
