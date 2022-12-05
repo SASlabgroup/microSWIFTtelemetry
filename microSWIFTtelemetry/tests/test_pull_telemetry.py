@@ -10,7 +10,7 @@ https://stackoverflow.com/questions/70098351/how-to-mock-a-http-request-post-in-
 
 import unittest
 from datetime import datetime, timezone
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd

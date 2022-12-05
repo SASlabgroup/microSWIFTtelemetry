@@ -62,7 +62,6 @@ def compile_sbd(
         return sort_dict(d)
 
     elif var_type == 'pandas':
-        print(data)
         df = pandas.DataFrame(data)
         if not df.empty:
             to_pandas_datetime_index(df)
