@@ -43,9 +43,9 @@ microSWIFTtelemetry/
 │   ├── pull_telemetry.py
 │   ├── sbd/
 │   │   ├── __init__.py
-│   │   ├── compile_SBD.py
+│   │   ├── compile_sbd.py
 │   │   ├── definitions.py
-│   │   └── read_SBD.py
+│   │   └── read_sbd.py
 │   └── version.py
 ├── pyproject.toml
 ├── requirements.txt
