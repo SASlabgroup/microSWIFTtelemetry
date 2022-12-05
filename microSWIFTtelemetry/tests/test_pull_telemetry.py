@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 
 import microSWIFTtelemetry as telemetry
-import microSWIFTtelemetry.sbd as sbd
+from microSWIFTtelemetry import sbd
 from microSWIFTtelemetry.sbd.definitions import get_variable_definitions
 
 # import microSWIFTtelemetry.pull_telemetry as telemetry
