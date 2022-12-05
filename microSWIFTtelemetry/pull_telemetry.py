@@ -101,21 +101,21 @@ def pull_telemetry_as_var(
                                              var_type = 'pandas')
     """
     # Create the payload request:
-    format_out = 'zip'
-    request = create_request(buoy_id, start_date, end_date, format_out)
+    FORMAT_OUT = 'zip'
+    request = create_request(buoy_id, start_date, end_date, FORMAT_OUT)
 
     # Define the base URL:
-    base_url = 'http://swiftserver.apl.washington.edu/services/buoy?action=get_data&'
+    BASE_URL = 'http://swiftserver.apl.washington.edu/services/buoy?action=get_data&'
 
     # Get the response:
-    response = urlopen(base_url + request)
+    response = urlopen(BASE_URL + request)
 
     # Read the response into memory as a virtual zip file:
     zipped_file = ZipFile(BytesIO(response.read())) # virtual zip file
     response.close()
 
     # Compile SBD messages into specified variable and return:
-    return compile_sbd(zipped_file, var_type, fromMemory = True)
+    return compile_sbd(zipped_file, var_type, from_memory = True)
 
 
 def pull_telemetry_as_zip(
@@ -151,14 +151,14 @@ def pull_telemetry_as_zip(
                                   start_date = datetime(2022,9,26))
     """
     # Create the payload request:
-    format_out = 'zip'
-    request = create_request(buoy_id, start_date, end_date, format_out)
+    FORMAT_OUT = 'zip'
+    request = create_request(buoy_id, start_date, end_date, FORMAT_OUT)
 
     # Define the base URL:
-    base_url = 'http://swiftserver.apl.washington.edu/services/buoy?action=get_data&'
+    BASE_URL = 'http://swiftserver.apl.washington.edu/services/buoy?action=get_data&'
 
     # Get the response:
-    response = urlopen(base_url + request)
+    response = urlopen(BASE_URL + request)
 
     # Write the response to a local .zip file:
     zipped_file = response.read()
@@ -208,17 +208,18 @@ def pull_telemetry_as_json(
         >>>     json.dump(SWIFT_json, f)
     """
     # Create the payload request:
-    format_out = 'json'
-    request = create_request(buoy_id, start_date, end_date, format_out)
+    FORMAT_OUT = 'json'
+    request = create_request(buoy_id, start_date, end_date, FORMAT_OUT)
 
     # Define the base URL:
-    base_url = 'http://swiftserver.apl.washington.edu/kml?action=kml&'
+    BASE_URL = 'http://swiftserver.apl.washington.edu/kml?action=kml&'
 
     # Get the response:
-    response = urlopen(base_url + request)
+    response = urlopen(BASE_URL + request)
 
     # Return as json
     json_data = response.read()
+
     response.close()
 
     return json.loads(json_data)
@@ -256,14 +257,14 @@ def pull_telemetry_as_kml(
                                   start_date = datetime(2022,9,26))
     """
     # Create the payload request:
-    format_out = 'kml'
-    request = create_request(buoy_id, start_date, end_date, format_out)
+    FORMAT_OUT = 'kml'
+    request = create_request(buoy_id, start_date, end_date, FORMAT_OUT)
 
     # Define the base URL:
-    base_url = 'http://swiftserver.apl.washington.edu/kml?action=kml&'
+    BASE_URL = 'http://swiftserver.apl.washington.edu/kml?action=kml&'
 
     # Get the response:
-    response = urlopen(base_url + request)
+    response = urlopen(BASE_URL + request)
 
     # Write the response to a local .kml geographic file:
     kml_file = response.read()
