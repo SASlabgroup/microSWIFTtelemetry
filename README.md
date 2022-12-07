@@ -9,8 +9,11 @@ microSWIFTtelemetry provides Python-based functionality for pulling telemetry fr
 This package contains python functions for programmatically accessing and compiling microSWIFT data from the UW-APL SWIFT server at [http://swiftserver.apl.washington.edu/](http://swiftserver.apl.washington.edu/) (base URL). The primary functions are contained in the `pull_telemetry.py` module and include:
 
 `pull_telemetry_as_var()` -- return request as a variable in memory
+
 `pull_telemetry_as_zip()` -- return request as a *.zip* file
+
 `pull_telemetry_as_json()` -- return request as JSON-formatted text
+
 `pull_telemetry_as_kml()` -- return a *.kml* file of GPS positions
 
 See [examples/](https://github.com/jacobrdavis/microSWIFTtelemetry/tree/main/examples) for usage.
