@@ -3,7 +3,7 @@
 [![GitHub license](https://img.shields.io/github/license/SASlabgroup/microSWIFTtelemetry)](https://github.com/SASlabgroup/microSWIFTtelemetry/blob/main/LICENSE)
 
 # <img src= "./docs/imgs/SWIFTlogo.jpg" height="120" align=left></img> microSWIFTtelemetry
-microSWIFTtelemetry provides Python-based functionality for pulling telemetry from the microSWIFT wave buoy developed at the University of Washington Applied Physics Laboratory (UW-APL). 
+Provides Python-based functionality for pulling telemetry from the microSWIFT wave buoy developed at the University of Washington Applied Physics Laboratory (UW-APL). 
 
 ## Contents
 This package contains python functions for programmatically accessing and compiling microSWIFT data from the UW-APL SWIFT server at [http://swiftserver.apl.washington.edu/](http://swiftserver.apl.washington.edu/) (base URL). The primary functions are contained in the `pull_telemetry.py` module and include:
