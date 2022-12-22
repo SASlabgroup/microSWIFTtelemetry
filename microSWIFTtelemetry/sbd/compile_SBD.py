@@ -8,6 +8,7 @@ __all__ = [
     "compile_sbd",
 ]
 
+import warnings
 from typing import Any
 
 import numpy as np
@@ -46,6 +47,7 @@ def compile_sbd(
     data = []
 
     if from_memory is True:
+
         for file in sbd_folder.namelist():
             data.append(read_sbd(sbd_folder.open(file)))
 
@@ -59,12 +61,18 @@ def compile_sbd(
 
     if var_type == 'dict':
         d = {k: [d.get(k) for d in data] for k in set().union(*data)}
-        return sort_dict(d)
+        if d:
+            d = sort_dict(d)
+        else:
+            warnings.warn("empty dict")
+        return d
 
     elif var_type == 'pandas':
         df = pandas.DataFrame(data)
         if not df.empty:
             to_pandas_datetime_index(df)
+        else:
+            warnings.warn("empty DataFrame")
         return df
 
     elif var_type == 'xarray': #TODO: support for xarray

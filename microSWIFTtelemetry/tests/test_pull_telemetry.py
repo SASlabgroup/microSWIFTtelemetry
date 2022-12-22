@@ -124,6 +124,14 @@ class TestPullTelemetry(unittest.TestCase):
             b"\x00\x00\x02\x00\x02\x008\x01\x00\x00\xa6\x03\x00\x00\x00\x00"
         )
 
+        # Sample .zip file binary representing the expected response
+        # from the SWIFT server when microSWIFT 010 is queried from
+        # datetime(2022,9,26,21) to datetime(2022,9,26,22); no data.
+        self.sample_zipped_sbd_file_empty = (
+            b"PK\x05\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+            b"\x00\x00\x00\x00\x00"
+        )
+
         # Sample data representing the expected response from read_sbd()
         # when microSWIFT 019 is queried from datetime(2022,9,26,21) to
         # datetime(2022,9,26,22).
@@ -333,6 +341,46 @@ class TestPullTelemetry(unittest.TestCase):
         sbd.to_pandas_datetime_index(expected_response)
         pd.testing.assert_frame_equal(response, expected_response)
 
+    @patch('microSWIFTtelemetry.pull_telemetry.urlopen')
+    def test_pull_telemetry_as_var_dict_empty(self, mock_urlopen):
+        """
+        Test pull_telemetry_as_var with var_type='dict' when the
+        response contains an empty file.
+        """
+        mock_urlopen.return_value.read.return_value = self.sample_zipped_sbd_file_empty
+
+        response = telemetry.pull_telemetry_as_var(
+            buoy_id='010',
+            start_date=datetime(2022,9,26,21),
+            end_date=datetime(2022,9,26,22),
+            var_type='dict'
+        )
+
+        expected_response = {}
+
+        self.assertIsNotNone(response)
+        self.assertIsInstance(response, dict)
+        self.assertDictEqual(response, expected_response)
+
+    @patch('microSWIFTtelemetry.pull_telemetry.urlopen')
+    def test_pull_telemetry_as_var_empty_pandas_empty(self, mock_urlopen):
+        """
+        Test pull_telemetry_as_var with var_type='pandas' when the
+        response contains an empty file.
+        """
+
+        mock_urlopen.return_value.read.return_value = self.sample_zipped_sbd_file_empty
+
+        response = telemetry.pull_telemetry_as_var(
+            buoy_id='010',
+            start_date=datetime(2022,9,26,21),
+            end_date=datetime(2022,9,26,22),
+            var_type='pandas'
+        )
+
+        expected_response = pd.DataFrame({})
+
+        pd.testing.assert_frame_equal(response, expected_response)
 
 if __name__ == '__main__':
     unittest.main()
