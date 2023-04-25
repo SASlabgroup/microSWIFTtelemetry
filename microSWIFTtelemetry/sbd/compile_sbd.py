@@ -64,7 +64,9 @@ def compile_sbd(
         if d:
             d = sort_dict(d)
         else:
-            warnings.warn("empty dict")
+            warnings.warn("Empty dictionary; if you expected data, make sure "
+                          "the `buoy_id` is a valid microSWIFT ID and that "
+                          "`start_date` and `end_date` are correct.")
         return d
 
     elif var_type == 'pandas':
@@ -72,7 +74,9 @@ def compile_sbd(
         if not df.empty:
             to_pandas_datetime_index(df)
         else:
-            warnings.warn("empty DataFrame")
+            warnings.warn("Empty DataFrame; if you expected data, make sure "
+                          "the `buoy_id` is a valid microSWIFT ID and that "
+                          "`start_date` and `end_date` are correct.")
         return df
 
     elif var_type == 'xarray': #TODO: support for xarray
