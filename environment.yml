@@ -6,6 +6,6 @@ dependencies:
   - pandas==1.5.1
   - xarray==2022.11.0
   - pip:
-    - microswifttelemetry==0.2
+    - microswifttelemetry
 
 prefix: /opt/homebrew/Caskroom/miniconda/base/envs/microSWIFTtelemetry_python3-9
