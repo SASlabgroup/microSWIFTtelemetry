@@ -9,6 +9,7 @@ __all__ = [
 
 from typing import List, Tuple
 
+
 def get_sensor_type_definition(sensor_type: int) -> str:
     """
     Dictionary of microSWIFT sensor type definitions;
@@ -29,9 +30,9 @@ def get_sensor_type_definition(sensor_type: int) -> str:
 
     # Define the sensor type using Python's struct module format
     PAYLOAD_DEFINITIONS = {
-        50 : '<sbbhfff42f42f42f42f42f42f42ffffffffiiiiii',
-        51 : '<sbbhfff42fffffffffffiiiiii',
-        52 : '<sbbheee42eee42b42b42b42b42Bffeeef',
+        50: '<sbbhfff42f42f42f42f42f42f42ffffffffiiiiii',
+        51: '<sbbhfff42fffffffffffiiiiii',
+        52: '<sbBheee42eee42b42b42b42b42Bffeeef',  # original v1 has `b` in third pos
     }
 
     if sensor_type not in PAYLOAD_DEFINITIONS.keys():
@@ -39,6 +40,7 @@ def get_sensor_type_definition(sensor_type: int) -> str:
                           f'{list(PAYLOAD_DEFINITIONS.keys())}'))
 
     return PAYLOAD_DEFINITIONS[sensor_type]
+
 
 def get_variable_definitions() -> List[Tuple]:
     """
@@ -56,7 +58,7 @@ def get_variable_definitions() -> List[Tuple]:
         ('significant_height', "significant wave height", "(m)"),
         ('peak_period', "peak period", "(s) "),
         ('peak_direction', "peak ave direction", "(deg)"),
-        ('energy_density' , "energy density", "(m^2/Hz)"),
+        ('energy_density', "energy density", "(m^2/Hz)"),
         ('frequency' , "frequency", "(Hz)"),
         ('a1', "first directional moment, positive E", "(-)"),
         ('b1', "second directional moment, positive N", "(-)"),
@@ -72,6 +74,8 @@ def get_variable_definitions() -> List[Tuple]:
         ('salinity', "mean salinity", "(psu)"),
         ('voltage', "mean battery voltage", "(V)"),
         ('sensor_type', "Iridium sensor type definition", "(-)"),
+        ('com_port', "Iridium com port or # of replaced values", "(-)"),
+        ('payload_size', "Iridium message size", "(bytes)"),
     ]
 
     return VARIABLE_DEFINITIONS
