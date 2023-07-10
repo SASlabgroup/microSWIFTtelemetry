@@ -1,5 +1,7 @@
 """
 Core module for accessing microSWIFT data from the UW-APL SWIFT server.
+#TODO:
+- needs docstr updates and flake linting
 """
 
 __all__ = [
@@ -48,7 +50,7 @@ def create_request(
     """
 
     # Convert dates to strings:
-    start_date_str  = start_date.strftime('%Y-%m-%dT%H:%M:%S')
+    start_date_str = start_date.strftime('%Y-%m-%dT%H:%M:%S')
     end_date_str = end_date.strftime('%Y-%m-%dT%H:%M:%S')
 
     # Pack into a payload dictionary:
@@ -82,7 +84,7 @@ def pull_telemetry_as_var(
         - var_type (str, optional), variable type to return;
                 defaults to 'dict'
             Possible values include:
-            * 'dict', returns a list of dictionaries #TODO: update
+            * 'dict', returns a dictionary of lists
             * 'pandas', returns a pandas DataFrame object
             * 'xarray', returns an xarray DataArray object
 

@@ -60,6 +60,8 @@ def unpack_sbd(file_name: str, file_content: bytes) -> Tuple:
         elif len(_rstrip_null(file_content)) == expected_file_size:
             data = struct.unpack(payload_struct, _rstrip_null(file_content))
         else:
+            error_message['error'] = (f'Unexpected message size ({file_size}B)'
+                                      f': {file_content}')
             warnings.warn(f'The short burst data message size ({file_size}B)\n'
                           f'does not match the expected size of sensor type '
                           f'{sensor_type} ({expected_file_size}B).',
