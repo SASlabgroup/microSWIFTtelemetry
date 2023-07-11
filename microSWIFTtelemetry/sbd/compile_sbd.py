@@ -1,5 +1,8 @@
 """
 Module for compiling microSWIFT short burst data (SBD) files.
+
+TODO:
+- support for xarray
 """
 
 __all__ = [
@@ -9,6 +12,7 @@ __all__ = [
 ]
 
 import warnings
+from collections import defaultdict
 from typing import Any
 
 import numpy as np
@@ -23,85 +27,84 @@ def compile_sbd(
     sbd_folder: str,
     var_type: str,
     from_memory: bool = False
-)-> Any:
+) -> Any:
     """
     Compile contents of short burst data files into the specified
     variable type or output.
 
-    Arguments:
-        - sbd_folder (str), directory containing.sbd files
-        - var_type (str), variable type to be returned
-        - from_memory (bool, optional), flag to indicate whether
+    Args:
+        sbd_folder (str): directory containing.sbd files
+        var_type (str): variable type to be returned
+        from_memory (bool, optional): flag to indicate whether
                 sbd_folder was loaded from memory (True) or a local file
                 (False); defaults to False.
 
     Raises:
-        - ValueError, var_type can only be 'dict', 'pandas', or 'xarray'
+        ValueError: var_type can only be 'dict', 'pandas', or 'xarray'
 
     Returns:
-        - (dict), if var_type == 'dict'
-        - (DataFrame), if var_type == 'pandas'
-        See pull_telemetry_as_var() for definitions
-
+        (dict): if var_type == 'dict'
+        (DataFrame): if var_type == 'pandas'
     """
     data = []
+    errors = []
 
-    if from_memory is True:
-
+    if from_memory:
         for file in sbd_folder.namelist():
-            data.append(read_sbd(sbd_folder.open(file)))
+            swift_data, error_message = read_sbd(sbd_folder.open(file))
+            if swift_data:
+                data.append(swift_data)
+            errors.append(error_message)
 
     else: #TODO: support reading from a folder of SBDs
-        raise Exception(('Reading from a folder on the local machine is not'
-                         'supported yet.'))
-        # for SBDfile in sbd_folder:
-        #     with open(SBDfile, mode='rb') as file: # b is important -> binary
-        #         # fileContent = file.read()
-        #         data.append(read_sbd(file))
+        raise NotImplementedError('Reading from a folder on the local '
+                                  'machine is not supported yet.')
+
+    errors = _combine_dict_list(errors)
 
     if var_type == 'dict':
-        d = {k: [d.get(k) for d in data] for k in set().union(*data)}
+        d = _combine_dict_list(data)
         if d:
             d = sort_dict(d)
         else:
             warnings.warn("Empty dictionary; if you expected data, make sure "
                           "the `buoy_id` is a valid microSWIFT ID and that "
                           "`start_date` and `end_date` are correct.")
-        return d
+        return d, errors
 
-    elif var_type == 'pandas':
+    if var_type == 'pandas':
         df = pandas.DataFrame(data)
+        errors = pandas.DataFrame(errors)
         if not df.empty:
             to_pandas_datetime_index(df)
         else:
             warnings.warn("Empty DataFrame; if you expected data, make sure "
                           "the `buoy_id` is a valid microSWIFT ID and that "
                           "`start_date` and `end_date` are correct.")
-        return df
+        return df, errors
 
-    elif var_type == 'xarray': #TODO: support for xarray
-        raise Exception('xarray is not supported yet')
+    if var_type == 'xarray':  # TODO: support for xarray
+        raise NotImplementedError('xarray is not supported yet')
 
-    else:
-        raise ValueError("var_type can only be 'dict', 'pandas', or 'xarray'")
+    raise ValueError("var_type can only be 'dict', 'pandas', or 'xarray'")
 
 
 def to_pandas_datetime_index(
     df: DataFrame,
     datetime_column: str = 'datetime',
-)-> DataFrame:
+) -> DataFrame:
     """
     Convert a pandas.DataFrame integer index to a pandas.DatetimeIndex
     in place.
 
-    Arguments:
-        - df (DataFrame), DataFrame with integer index
-        - datetime_column (str, optional), column name containing
+    Args:
+        df (DataFrame): DataFrame with integer index
+        datetime_column (str, optional): column name containing
                 datetime objects to be converted to datetime index;
                 defaults to 'datetime'.
 
     Returns:
-        - (DataFrame), DataFrame with datetime index
+        (DataFrame): DataFrame with datetime index
     """
     df[datetime_column] = to_datetime(df['datetime'], utc=True)
     df.set_index('datetime', inplace=True)
@@ -109,19 +112,37 @@ def to_pandas_datetime_index(
     # df.drop(['datetime'], axis=1, inplace=True)
 
 
+def _combine_dict_list(dict_list):
+    """Helper function to combine a list of dictionaries with equivalent keys.
+
+    Args:
+        dict_list (list): list containing dictonaries
+
+    Returns:
+        dict: unified dictionary
+    """
+    combined_dict = defaultdict(list)
+    for d in dict_list:
+        for key, value in d.items():
+            combined_dict[key].append(value)
+
+    return combined_dict
+    # return {k: [d.get(k) for d in dict_list] for k in set().union(*dict_list)}
+
+
 def sort_dict(
     d: dict,
-)-> dict:
+) -> dict:
     """
     Sort each key of a dictionary containing microSWIFT data based on
     the key containing datetime information.
 
-    Arguments:
-        - d (dict), unsorted dictionary
+    Args:
+        d (dict): unsorted dictionary
             * Must contain a 'datetime' key with a list of datetimes
 
     Returns:
-        - (dict), sorted dictionary
+        (dict): sorted dictionary
     """
     sort_index = np.argsort(d['datetime'])
     d_sorted = {}
@@ -129,3 +150,4 @@ def sort_dict(
         d_sorted[key] = np.array(val)[sort_index]
 
     return d_sorted
+

@@ -1,5 +1,7 @@
 """
 Core module for accessing microSWIFT data from the UW-APL SWIFT server.
+#TODO:
+- needs docstr updates and flake linting
 """
 
 __all__ = [
@@ -30,7 +32,7 @@ def create_request(
     start_date: datetime,
     end_date: datetime,
     format_out: str
-)-> dict:
+) -> dict:
     """
     Create a URL-encoded request.
 
@@ -48,7 +50,7 @@ def create_request(
     """
 
     # Convert dates to strings:
-    start_date_str  = start_date.strftime('%Y-%m-%dT%H:%M:%S')
+    start_date_str = start_date.strftime('%Y-%m-%dT%H:%M:%S')
     end_date_str = end_date.strftime('%Y-%m-%dT%H:%M:%S')
 
     # Pack into a payload dictionary:
@@ -67,7 +69,7 @@ def pull_telemetry_as_var(
     start_date: datetime,
     end_date: datetime = datetime.utcnow(),
     var_type: str = 'dict',
-)-> Union[List[dict], DataFrame, DataArray]:
+) -> Union[List[dict], DataFrame, DataArray]:
     """
     Query the SWIFT server for microSWIFT data over a specified date
     range and return an object in memory. Note the `.zip` file of short
@@ -82,7 +84,7 @@ def pull_telemetry_as_var(
         - var_type (str, optional), variable type to return;
                 defaults to 'dict'
             Possible values include:
-            * 'dict', returns a list of dictionaries #TODO: update
+            * 'dict', returns a dictionary of lists
             * 'pandas', returns a pandas DataFrame object
             * 'xarray', returns an xarray DataArray object
 
@@ -116,7 +118,7 @@ def pull_telemetry_as_var(
     response.close()
 
     # Compile SBD messages into specified variable and return:
-    return compile_sbd(zipped_file, var_type, from_memory = True)
+    return compile_sbd(zipped_file, var_type, from_memory=True)
 
 
 def pull_telemetry_as_zip(
@@ -124,7 +126,7 @@ def pull_telemetry_as_zip(
     start_date: datetime,
     end_date: datetime = datetime.utcnow(),
     local_path: str = None,
-)-> BinaryIO:
+) -> BinaryIO:
     """
     Query the SWIFT server for microSWIFT data over a specified date
     range and download a `.zip` file of individual short burst data
@@ -178,7 +180,7 @@ def pull_telemetry_as_json(
     buoy_id: str,
     start_date: datetime,
     end_date: datetime = datetime.utcnow(),
-)-> dict:
+) -> dict:
     """
     Query the SWIFT server for microSWIFT data over a specified date
     range and download a `.zip` file of individual short burst data
@@ -225,12 +227,13 @@ def pull_telemetry_as_json(
 
     return json.loads(json_data)
 
+
 def pull_telemetry_as_kml(
     buoy_id: str,
     start_date: datetime,
     end_date: datetime = datetime.utcnow(),
     local_path: str = None,
-)-> TextIO:
+) -> TextIO:
     """
     Query the SWIFT server for microSWIFT data over a specified date
     range and download a `.kml` file containing the buoy's coordinates.
@@ -271,7 +274,7 @@ def pull_telemetry_as_kml(
     kml_file = response.read()
     response.close()
     if local_path is None:
-        start_date_str  = start_date.strftime('%Y-%m-%dT%H%M%S')
+        start_date_str = start_date.strftime('%Y-%m-%dT%H%M%S')
         end_date_str = end_date.strftime('%Y-%m-%dT%H%M%S')
         local_path = os.path.join(
             os.getcwd(),
