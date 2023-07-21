@@ -11,6 +11,7 @@ __all__ = [
     "compile_sbd",
 ]
 
+import os
 import warnings
 from collections import defaultdict
 from typing import Any
@@ -31,6 +32,8 @@ def compile_sbd(
     """
     Compile contents of short burst data files into the specified
     variable type or output.
+
+    Valid variable types: 'dict' or 'pandas'
 
     Args:
         sbd_folder (str): directory containing.sbd files
@@ -56,9 +59,13 @@ def compile_sbd(
                 data.append(swift_data)
             errors.append(error_message)
 
-    else: #TODO: support reading from a folder of SBDs
-        raise NotImplementedError('Reading from a folder on the local '
-                                  'machine is not supported yet.')
+    else:
+        for file in os.listdir(sbd_folder):
+            with open(os.path.join(sbd_folder, file), 'rb') as file:
+                swift_data, error_message = read_sbd(file)
+            if swift_data:
+                data.append(swift_data)
+            errors.append(error_message)
 
     errors = _combine_dict_list(errors)
 
