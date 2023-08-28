@@ -65,7 +65,7 @@ def create_request(
 
 
 def pull_telemetry_as_var(
-    buoy_id: str,  # TODO: should this accept a list?
+    buoy_id: str,
     start_date: datetime,
     end_date: datetime = datetime.utcnow(),
     var_type: str = 'dict',
