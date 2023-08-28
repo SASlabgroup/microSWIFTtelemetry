@@ -82,17 +82,24 @@ def compile_sbd(
     if var_type == 'pandas':
         df = pandas.DataFrame(data)
         errors = pandas.DataFrame(errors)
+
         if not df.empty:
             to_pandas_datetime_index(df)
         else:
             warnings.warn("Empty DataFrame; if you expected data, make sure "
                           "the `buoy_id` is a valid microSWIFT ID and that "
                           "`start_date` and `end_date` are correct.")
+
+        if not errors.empty:
+            errors = errors.sort_values(by='file_name')
+            errors.reset_index(drop=True, inplace=True)
+
+        #TODO: concatenate dfs?
         return df, errors
 
     if var_type == 'xarray':  # TODO: support for xarray
         raise NotImplementedError('xarray is not supported yet')
-
+    #TODO: should this be 'dataframe' and 'dataset'?
     raise ValueError("var_type can only be 'dict', 'pandas', or 'xarray'")
 
 
@@ -116,7 +123,6 @@ def to_pandas_datetime_index(
     df[datetime_column] = to_datetime(df['datetime'], utc=True)
     df.set_index('datetime', inplace=True)
     df.sort_index(inplace=True)
-    # df.drop(['datetime'], axis=1, inplace=True)
 
 
 def _combine_dict_list(dict_list):
