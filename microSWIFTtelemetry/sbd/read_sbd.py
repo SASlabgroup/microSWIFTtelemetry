@@ -171,8 +171,8 @@ def unpack_sensor_type_52(data):
     fmin = data[49]
     fmax = data[50]
     if fmin != 999 and fmax != 999:
-        fstep = (fmax - fmin)/(len(swift['energy_density'])-1)
-        swift['frequency'] = np.arange(fmin, fmax + fstep, fstep)
+        fnum = len(swift['energy_density'])
+        swift['frequency'] = np.linspace(fmin, fmax, fnum)
     else:
         swift['frequency'] = 999*np.ones(np.shape(swift['energy_density']))
     swift['a1'] = np.asarray(data[51:93])/100
