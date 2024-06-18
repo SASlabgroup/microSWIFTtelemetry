@@ -10,6 +10,9 @@ dev_notes.md
 #vscode
 .vscode
 
+# Sphinx
+docs/_build/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

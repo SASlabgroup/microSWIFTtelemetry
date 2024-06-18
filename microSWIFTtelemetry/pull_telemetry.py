@@ -5,7 +5,7 @@ Core module for accessing microSWIFT data from the UW-APL SWIFT server.
 """
 
 __all__ = [
-    "create_request",
+    # "create_request",
     "pull_telemetry_as_var",
     "pull_telemetry_as_zip",
     "pull_telemetry_as_json",
