@@ -3,6 +3,7 @@ Module for compiling microSWIFT short burst data (SBD) files.
 
 TODO:
 - support for xarray
+- to_netcdf function with nccompliance
 """
 
 __all__ = [
@@ -14,22 +15,30 @@ __all__ = [
 import os
 import warnings
 from collections import defaultdict
-from typing import Any
+from typing import Any, Union, Dict, Literal
+from zipfile import ZipFile
 
 import numpy as np
 import pandas
 import xarray
 from pandas import DataFrame, to_datetime
 
-from microSWIFTtelemetry.sbd.read_sbd import read_sbd
+from microSWIFTtelemetry.sbd.read import SbdMessage
+
+
+# CompiledSbd = Union[dict, pandas.DataFrame, xarray.Dataset]
+SbdDict = tuple[dict, dict]
+SbdPandas = tuple[pandas.DataFrame, pandas.DataFrame]
+SbdXarray = tuple[xarray.Dataset, xarray.Dataset]
 
 
 def compile_sbd(
-    sbd_folder: str,
-    var_type: str,
+    sbd_folder: ZipFile,  # Union[ZipFile, os.PathLike],
+    var_type: Literal['dict', 'pandas', 'xarray'],
     from_memory: bool = False
-) -> Any:
+) -> Union[SbdDict, SbdPandas, SbdXarray]:
     """
+    #TODO: update:
     Compile contents of short burst data files into the specified
     variable type or output.
 
@@ -49,60 +58,66 @@ def compile_sbd(
         (dict): if var_type == 'dict'
         (DataFrame): if var_type == 'pandas'
     """
-    data = []
-    errors = []
+    data_list = []
+    error_list = []
 
+    #TODO: split into two functions
     if from_memory:
         for file in sbd_folder.namelist():
-            swift_data, error_message = read_sbd(sbd_folder.open(file))
-            if swift_data:
-                data.append(swift_data)
-            errors.append(error_message)
+            sbd_message = SbdMessage(sbd_folder.open(file))
+            data, error_message = sbd_message.read()
+            if data:
+                data_list.append(data)
+            error_list.append(error_message)
 
-    else:
-        for file in os.listdir(sbd_folder):
-            with open(os.path.join(sbd_folder, file), 'rb') as file:
-                swift_data, error_message = read_sbd(file)
-            if swift_data:
-                data.append(swift_data)
-            errors.append(error_message)
+    # else:
+    #     for file in os.listdir(sbd_folder):
+    #         with open(os.path.join(sbd_folder, file), 'rb') as open_file:
+    #             sbd_message = SbdMessage(open_file)
+    #             data, error_message = sbd_message.read()
+    #         if data:
+    #             data_list.append(data)
+    #         error_list.append(error_message)
 
-    errors = _combine_dict_list(errors)
+    error_dict = _combine_dict_list(error_list)
 
     if var_type == 'dict':
-        d = _combine_dict_list(data)
-        if d:
-            d = sort_dict(d)
+        data_dict = _combine_dict_list(data_list)
+        if data_dict:
+            data_dict = sort_dict(data_dict)
         else:
             warnings.warn("Empty dictionary; if you expected data, make sure "
                           "the `buoy_id` is a valid microSWIFT ID and that "
                           "`start_date` and `end_date` are correct.")
-        return d, errors
+        return data_dict, error_dict
 
-    if var_type == 'pandas':
-        df = pandas.DataFrame(data)
-        errors = pandas.DataFrame(errors)
+    elif var_type == 'pandas':
+        data_df = pandas.DataFrame(data_list)
+        error_df = pandas.DataFrame(error_dict)
 
-        if not df.empty:
-            to_pandas_datetime_index(df)
+        if not data_df.empty:
+            to_pandas_datetime_index(data_df)
         else:
             warnings.warn("Empty DataFrame; if you expected data, make sure "
                           "the `buoy_id` is a valid microSWIFT ID and that "
                           "`start_date` and `end_date` are correct.")
 
-        if not errors.empty:
-            errors = errors.sort_values(by='file_name')
-            errors.reset_index(drop=True, inplace=True)
+        if not error_df.empty:
+            error_df = error_df.sort_values(by='file_name')
+            error_df.reset_index(drop=True, inplace=True)
 
         #TODO: concatenate dfs?
-        return df, errors
+        return data_df, error_df
 
-    if var_type == 'xarray':  # TODO: support for xarray
+    elif var_type == 'xarray':  # TODO: support for xarray
+        # TODO: use VARIABLE_DEFINTIONS for description and units
         raise NotImplementedError('xarray is not supported yet')
-    #TODO: should this be 'dataframe' and 'dataset'?
-    raise ValueError("var_type can only be 'dict', 'pandas', or 'xarray'")
+
+    else:
+        raise ValueError("var_type can only be 'dict', 'pandas', or 'xarray'")
 
 
+#TODO: update to remove inplace
 def to_pandas_datetime_index(
     df: DataFrame,
     datetime_column: str = 'datetime',
@@ -125,7 +140,7 @@ def to_pandas_datetime_index(
     df.sort_index(inplace=True)
 
 
-def _combine_dict_list(dict_list):
+def _combine_dict_list(dict_list: list[dict[Any, Any]]) -> Dict[Any, Any]:
     """Helper function to combine a list of dictionaries with equivalent keys.
 
     Args:

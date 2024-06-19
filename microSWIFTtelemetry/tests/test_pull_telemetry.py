@@ -15,13 +15,14 @@ from unittest.mock import patch
 import numpy as np
 import pandas as pd
 
-import microSWIFTtelemetry as telemetry
-from microSWIFTtelemetry import sbd
-from microSWIFTtelemetry.sbd.definitions import get_variable_definitions
+# TODO: as module imports
+# import microSWIFTtelemetry as telemetry
+# from microSWIFTtelemetry import sbd
 
-# import microSWIFTtelemetry.pull_telemetry as telemetry
-# import microSWIFTtelemetry.sbd as sbd
-# from microSWIFTtelemetry.sbd.definitions import get_variable_definitions
+# as local imports
+from microSWIFTtelemetry.pull_telemetry import pull_telemetry_as_var, pull_telemetry_as_json
+from microSWIFTtelemetry.sbd.definitions import VARIABLE_DEFINITIONS
+from microSWIFTtelemetry.sbd import to_pandas_datetime_index
 
 
 class TestPullTelemetry(unittest.TestCase):
@@ -410,7 +411,7 @@ class TestPullTelemetry(unittest.TestCase):
 
         mock_urlopen.return_value.read.return_value = self.sample_json_text
 
-        response = telemetry.pull_telemetry_as_json(
+        response = pull_telemetry_as_json(
             buoy_id='019',
             start_date=datetime(2022,9,26,21),
             end_date=datetime(2022,9,26,22)
@@ -428,11 +429,12 @@ class TestPullTelemetry(unittest.TestCase):
 
         mock_urlopen.return_value.read.return_value = self.sample_zipped_sbd_file
 
-        response, errors = telemetry.pull_telemetry_as_var(
+        response, errors = pull_telemetry_as_var(
             buoy_id='019',
             start_date=datetime(2022, 9, 26, 21),
             end_date=datetime(2022, 9, 26, 22),
-            var_type='dict'
+            var_type='dict',
+            return_errors=True,
         )
 
         # expected_response = self.sample_dictionary_data
@@ -444,7 +446,7 @@ class TestPullTelemetry(unittest.TestCase):
         self.assertIsNotNone(response)
         self.assertIsInstance(response, dict)
         self.assertEqual(response.keys(), expected_response.keys())
-        for variable in get_variable_definitions():
+        for variable in VARIABLE_DEFINITIONS:
             np.array_equal(response[variable[0]], expected_response[variable[0]])
 
         self.assertIsInstance(expected_errors, dict)
@@ -458,11 +460,12 @@ class TestPullTelemetry(unittest.TestCase):
 
         mock_urlopen.return_value.read.return_value = self.sample_zipped_sbd_file_2
 
-        response, errors = telemetry.pull_telemetry_as_var(
+        response, errors = pull_telemetry_as_var(
             buoy_id='012',
             start_date=datetime(2023, 7, 9, 5),
             end_date=datetime(2023, 7, 9, 6),
-            var_type='dict'
+            var_type='dict',
+            return_errors=True,
         )
 
         data = self.sample_data_2
@@ -473,7 +476,7 @@ class TestPullTelemetry(unittest.TestCase):
         self.assertIsNotNone(response)
         self.assertIsInstance(response, dict)
         self.assertEqual(response.keys(), expected_response.keys())
-        for variable in get_variable_definitions():
+        for variable in VARIABLE_DEFINITIONS:
             np.array_equal(response[variable[0]], expected_response[variable[0]])
 
         self.assertIsInstance(expected_errors, dict)
@@ -487,17 +490,18 @@ class TestPullTelemetry(unittest.TestCase):
 
         mock_urlopen.return_value.read.return_value = self.sample_zipped_sbd_file
 
-        response, errors = telemetry.pull_telemetry_as_var(
+        response, errors = pull_telemetry_as_var(
             buoy_id='019',
             start_date=datetime(2022,9,26,21),
             end_date=datetime(2022,9,26,22),
-            var_type='pandas'
+            var_type='pandas',
+            return_errors=True,
         )
 
         expected_response = pd.DataFrame(self.sample_data)
         expected_errors = pd.DataFrame(self.sample_data_errors)
 
-        sbd.to_pandas_datetime_index(expected_response)
+        to_pandas_datetime_index(expected_response)
         pd.testing.assert_frame_equal(response, expected_response)
         pd.testing.assert_frame_equal(errors, expected_errors)
 
@@ -507,17 +511,18 @@ class TestPullTelemetry(unittest.TestCase):
 
         mock_urlopen.return_value.read.return_value = self.sample_zipped_sbd_file_2
 
-        response, errors = telemetry.pull_telemetry_as_var(
+        response, errors = pull_telemetry_as_var(
             buoy_id='012',
             start_date=datetime(2023, 7, 9, 5),
             end_date=datetime(2023, 7, 9, 6),
-            var_type='pandas'
+            var_type='pandas',
+            return_errors=True,
         )
 
         expected_response = pd.DataFrame(self.sample_data_2)
         expected_errors = pd.DataFrame(self.sample_data_errors_2)
 
-        sbd.to_pandas_datetime_index(expected_response)
+        to_pandas_datetime_index(expected_response)
         pd.testing.assert_frame_equal(response, expected_response)
         pd.testing.assert_frame_equal(errors, expected_errors)
 
@@ -529,11 +534,12 @@ class TestPullTelemetry(unittest.TestCase):
         """
         mock_urlopen.return_value.read.return_value = self.sample_zipped_sbd_file_empty
 
-        response, errors = telemetry.pull_telemetry_as_var(
+        response, errors = pull_telemetry_as_var(
             buoy_id='010',
             start_date=datetime(2022,9,26,21),
             end_date=datetime(2022,9,26,22),
-            var_type='dict'
+            var_type='dict',
+            return_errors=True,
         )
 
         expected_response = {}
@@ -553,11 +559,12 @@ class TestPullTelemetry(unittest.TestCase):
 
         mock_urlopen.return_value.read.return_value = self.sample_zipped_sbd_file_empty
 
-        response, errors = telemetry.pull_telemetry_as_var(
+        response, errors = pull_telemetry_as_var(
             buoy_id='010',
             start_date=datetime(2022,9,26,21),
             end_date=datetime(2022,9,26,22),
-            var_type='pandas'
+            var_type='pandas',
+            return_errors=True,
         )
 
         expected_response = pd.DataFrame({})
@@ -565,6 +572,7 @@ class TestPullTelemetry(unittest.TestCase):
 
         pd.testing.assert_frame_equal(response, expected_response)
         pd.testing.assert_frame_equal(errors, expected_errors)
+
 
 if __name__ == '__main__':
     unittest.main()

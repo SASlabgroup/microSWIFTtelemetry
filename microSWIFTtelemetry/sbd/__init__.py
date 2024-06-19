@@ -1,3 +1,3 @@
-from .compile_sbd import *
+from .compile import *
 from .definitions import *
-from .read_sbd import *
+from .read import *

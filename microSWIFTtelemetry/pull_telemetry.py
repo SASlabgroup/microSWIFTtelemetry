@@ -15,25 +15,31 @@ __all__ = [
 import json
 import os
 
-from datetime import datetime
-from typing import Union, List, BinaryIO, TextIO
+from datetime import datetime, timezone
+from typing import Union, Literal, Optional
 from urllib.request import urlopen
 from urllib.parse import urlencode, quote_plus
 from zipfile import ZipFile
 
 from io import BytesIO
 from pandas import DataFrame
-from xarray import DataArray
-from microSWIFTtelemetry.sbd.compile_sbd import compile_sbd
+from xarray import Dataset
+from microSWIFTtelemetry.sbd.compile import compile_sbd
+
+
+CompiledData = Union[dict, DataFrame, Dataset]
+CompiledErrors = Union[dict, DataFrame, Dataset]
 
 
 def create_request(
     buoy_id: str,
     start_date: datetime,
     end_date: datetime,
-    format_out: str
-) -> dict:
+    format_out: Literal['zip', 'json', 'kml'],
+) -> str:
     """
+    TODO: update
+
     Create a URL-encoded request.
 
     Arguments:
@@ -55,10 +61,10 @@ def create_request(
 
     # Pack into a payload dictionary:
     payload = {
-        'buoy_name' : f'microSWIFT {buoy_id}'.encode('utf8'),
-        'start' : start_date_str.encode('utf8'),
-        'end' : end_date_str.encode('utf8'),
-        'format' : format_out.encode('utf8')
+        'buoy_name': f'microSWIFT {buoy_id}'.encode('utf8'),
+        'start': start_date_str.encode('utf8'),
+        'end': end_date_str.encode('utf8'),
+        'format': format_out.encode('utf8')
     }
 
     return urlencode(payload, quote_via=quote_plus)
@@ -66,11 +72,13 @@ def create_request(
 
 def pull_telemetry_as_var(
     buoy_id: str,
-    start_date: datetime,
-    end_date: datetime = datetime.utcnow(),
-    var_type: str = 'dict',
-) -> Union[List[dict], DataFrame, DataArray]:
+    start_date: datetime,  # TODO: include pd.Datetime
+    end_date: datetime = datetime.now(timezone.utc),
+    var_type: Literal['dict', 'pandas', 'xarray'] = 'dict',
+    return_errors: bool = False,
+) -> Union[CompiledData, tuple[CompiledData, CompiledErrors]]:
     """
+    TODO: update
     Query the SWIFT server for microSWIFT data over a specified date
     range and return an object in memory. Note the `.zip` file of short
     burst data (SBD) messages is handled in memory and not saved to the
@@ -80,7 +88,7 @@ def pull_telemetry_as_var(
         - buoy_id (str), microSWIFT ID (e.g. '043')
         - start_date (datetime), query start date in UTC
         - end_date (datetime, optional), query end date in UTC; defaults
-                to datetime.utcnow().
+                to datetime.now(timezone.utc).
         - var_type (str, optional), variable type to return;
                 defaults to 'dict'
             Possible values include:
@@ -103,31 +111,36 @@ def pull_telemetry_as_var(
         >>> SWIFT_df = pull_telemetry_as_var('019', datetime(2022,9,26),
                                              var_type = 'pandas')
     """
-    # Create the payload request:
     FORMAT_OUT = 'zip'
-    request = create_request(buoy_id, start_date, end_date, FORMAT_OUT)
-
-    # Define the base URL:
     BASE_URL = 'http://swiftserver.apl.washington.edu/services/buoy?action=get_data&'
 
-    # Get the response:
+    # TODO: Loop for multiple Ids should happen here
+    # Query the SWIFT server
+    request = create_request(buoy_id, start_date, end_date, FORMAT_OUT)
     response = urlopen(BASE_URL + request)
 
     # Read the response into memory as a virtual zip file:
-    zipped_file = ZipFile(BytesIO(response.read())) # virtual zip file
+    zipped_file = ZipFile(BytesIO(response.read()))  # virtual zip file
     response.close()
 
-    # Compile SBD messages into specified variable and return:
-    return compile_sbd(zipped_file, var_type, from_memory=True)
+    # Compile SBD messages into specified variable
+    data, errors = compile_sbd(zipped_file, var_type, from_memory=True)
+
+    if return_errors:
+        return data, errors
+    else:
+        return data
 
 
 def pull_telemetry_as_zip(
     buoy_id: str,
     start_date: datetime,
-    end_date: datetime = datetime.utcnow(),
-    local_path: str = None,
-) -> BinaryIO:
+    end_date: datetime = datetime.now(timezone.utc),
+    local_path: Optional[str] = None,
+) -> None:
     """
+    TODO: update
+
     Query the SWIFT server for microSWIFT data over a specified date
     range and download a `.zip` file of individual short burst data
     (SBD) messages.
@@ -136,7 +149,7 @@ def pull_telemetry_as_zip(
         - buoy_id (str), microSWIFT ID (e.g. '043')
         - start_date (datetime), query start date in UTC
         - end_date (datetime, optional), query end date in UTC; defaults
-                to datetime.utcnow().
+                to datetime.now(timezone.utc).
         - local_path (str, optional), path to local file destination
                 including folder and filename; defaults to the current
                 directory as './microSWIFT{buoy_id}.zip'
@@ -153,14 +166,11 @@ def pull_telemetry_as_zip(
         >>> pull_telemetry_as_zip(buoy_id = '019',
                                   start_date = datetime(2022,9,26))
     """
-    # Create the payload request:
     FORMAT_OUT = 'zip'
-    request = create_request(buoy_id, start_date, end_date, FORMAT_OUT)
-
-    # Define the base URL:
     BASE_URL = 'http://swiftserver.apl.washington.edu/services/buoy?action=get_data&'
 
-    # Get the response:
+    # Query the SWIFT server
+    request = create_request(buoy_id, start_date, end_date, FORMAT_OUT)
     response = urlopen(BASE_URL + request)
 
     # Write the response to a local .zip file:
@@ -175,11 +185,13 @@ def pull_telemetry_as_zip(
         local.write(zipped_file)
         local.close()
 
+    return None
+
 
 def pull_telemetry_as_json(
     buoy_id: str,
     start_date: datetime,
-    end_date: datetime = datetime.utcnow(),
+    end_date: datetime = datetime.now(timezone.utc),
 ) -> dict:
     """
     Query the SWIFT server for microSWIFT data over a specified date
@@ -190,7 +202,7 @@ def pull_telemetry_as_json(
         - buoy_id (str), microSWIFT ID (e.g. '043')
         - start_date (datetime), query start date in UTCs
         - end_date (datetime, optional), query end date in UTC; defaults
-                to datetime.utcnow().
+                to datetime.now(timezone.utc).
 
     Returns:
         - (dict), JSON-formatted Python dictionary
@@ -210,19 +222,15 @@ def pull_telemetry_as_json(
         >>> with open('SWIFT.json', 'w') as f:
         >>>     json.dump(SWIFT_json, f)
     """
-    # Create the payload request:
     FORMAT_OUT = 'json'
-    request = create_request(buoy_id, start_date, end_date, FORMAT_OUT)
-
-    # Define the base URL:
     BASE_URL = 'http://swiftserver.apl.washington.edu/kml?action=kml&'
 
-    # Get the response:
+    # Query the SWIFT server
+    request = create_request(buoy_id, start_date, end_date, FORMAT_OUT)
     response = urlopen(BASE_URL + request)
 
     # Return as json
     json_data = response.read()
-
     response.close()
 
     return json.loads(json_data)
@@ -231,9 +239,9 @@ def pull_telemetry_as_json(
 def pull_telemetry_as_kml(
     buoy_id: str,
     start_date: datetime,
-    end_date: datetime = datetime.utcnow(),
-    local_path: str = None,
-) -> TextIO:
+    end_date: datetime = datetime.now(timezone.utc),
+    local_path: Optional[str] = None,
+) -> None:
     """
     Query the SWIFT server for microSWIFT data over a specified date
     range and download a `.kml` file containing the buoy's coordinates.
@@ -242,7 +250,7 @@ def pull_telemetry_as_kml(
         - buoy_id (str), microSWIFT ID (e.g. '043')
         - start_date (datetime), query start date in UTC
         - end_date (datetime, optional), query end date in UTC; defaults
-                to datetime.utcnow().
+                to datetime.now(timezone.utc).
         - local_path (str, optional), path to local file destination
                 including folder and filename; defaults to the current
                 directory as ./microSWIFT{buoy_id}_{'%Y-%m-%dT%H%M%S'}
@@ -260,14 +268,11 @@ def pull_telemetry_as_kml(
         >>> pull_telemetry_as_kml(buoy_id = '019',
                                   start_date = datetime(2022,9,26))
     """
-    # Create the payload request:
     FORMAT_OUT = 'kml'
-    request = create_request(buoy_id, start_date, end_date, FORMAT_OUT)
-
-    # Define the base URL:
     BASE_URL = 'http://swiftserver.apl.washington.edu/kml?action=kml&'
 
-    # Get the response:
+    # Query the SWIFT server
+    request = create_request(buoy_id, start_date, end_date, FORMAT_OUT)
     response = urlopen(BASE_URL + request)
 
     # Write the response to a local .kml geographic file:
@@ -282,3 +287,5 @@ def pull_telemetry_as_kml(
         )
     with open(local_path, 'wb') as local:
         local.write(kml_file)
+
+    return None
