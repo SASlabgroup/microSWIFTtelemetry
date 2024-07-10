@@ -24,9 +24,9 @@ from zipfile import ZipFile
 from io import BytesIO
 from pandas import DataFrame
 from xarray import Dataset
-from microSWIFTtelemetry.sbd.compile import compile_sbd
+from microSWIFTtelemetry.sbd.message_compiler import compile_sbd
 
-
+# Type aliases
 CompiledData = Union[dict, DataFrame, Dataset]
 CompiledErrors = Union[dict, DataFrame, Dataset]
 
@@ -85,7 +85,7 @@ def pull_telemetry_as_var(
     local machine. Use pull_telemetry_as_zip for this purpose.
 
     Arguments:
-        - buoy_id (str), microSWIFT ID (e.g. '043')
+        - buoy_id (str), three-digit microSWIFT ID (e.g. '043')
         - start_date (datetime), query start date in UTC
         - end_date (datetime, optional), query end date in UTC; defaults
                 to datetime.now(timezone.utc).
@@ -122,6 +122,7 @@ def pull_telemetry_as_var(
     # Read the response into memory as a virtual zip file:
     zipped_file = ZipFile(BytesIO(response.read()))  # virtual zip file
     response.close()
+    #TODO: can the zip files be aggregated before compiling?
 
     # Compile SBD messages into specified variable
     data, errors = compile_sbd(zipped_file, var_type, from_memory=True)

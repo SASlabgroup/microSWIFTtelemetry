@@ -12,7 +12,7 @@ __all__ = [
 import struct
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import Any, TypedDict, TypeVar, Union
+from typing import Any, Type
 
 import numpy as np
 
@@ -24,7 +24,7 @@ VARIABLE_DEFINITIONS = [
     ('peak_period', "peak period", "(s) "),
     ('peak_direction', "peak ave direction", "(deg)"),
     ('energy_density', "energy density", "(m^2/Hz)"),
-    ('frequency' , "frequency", "(Hz)"),
+    ('frequency', "frequency", "(Hz)"),
     ('a1', "first directional moment, positive E", "(-)"),
     ('b1', "second directional moment, positive N", "(-)"),
     ('a2', "third directional moment, positive E-W", "(-)"),
@@ -50,17 +50,18 @@ def init_swift_dict() -> dict:
 
 
 class SensorType(ABC):
+    """ TODO: """
     @abstractmethod
     def __init__(self, sbd_content: bytes):
         pass
 
     @property
     @abstractmethod
-    def expected_file_size(self):
+    def expected_file_size(self) -> int:
         pass
 
     @abstractmethod
-    def unpack(self):
+    def unpack(self) -> dict[str, Any]:
         pass
 
 
@@ -71,7 +72,7 @@ class SensorType52(SensorType):
         self.sbd_content = sbd_content
 
     @property
-    def expected_file_size(self):
+    def expected_file_size(self) -> int:
         return struct.calcsize(self.definition)
 
     def unpack(self) -> dict[str, Any]:
@@ -167,17 +168,3 @@ class SensorType50(SensorType):
     def unpack(self) -> dict[str, Any]:
         """ Unpack microSWIFT sensor type 51 into a dictionary. """
         raise NotImplementedError
-
-
-# TSensorType = TypeVar("TSensorType", bound="SensorType")
-
-# class SensorTypeDict(TypedDict):
-#     key: int
-#     value: Any  #Union[SensorType50, SensorType51, SensorType52]
-
-
-# SENSOR_TYPES: SensorTypeDict = {
-#     50: SensorType50,
-#     51: SensorType51,
-#     52: SensorType52,
-# }

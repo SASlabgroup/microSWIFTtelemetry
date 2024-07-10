@@ -23,9 +23,9 @@ import pandas
 import xarray
 from pandas import DataFrame, to_datetime
 
-from microSWIFTtelemetry.sbd.read import SbdMessage
+from microSWIFTtelemetry.sbd.message_handler import SbdMessage
 
-
+# Type hint aliases
 # CompiledSbd = Union[dict, pandas.DataFrame, xarray.Dataset]
 SbdDict = tuple[dict, dict]
 SbdPandas = tuple[pandas.DataFrame, pandas.DataFrame]
@@ -63,12 +63,13 @@ def compile_sbd(
 
     #TODO: split into two functions
     if from_memory:
-        for file in sbd_folder.namelist():
-            sbd_message = SbdMessage(sbd_folder.open(file))
-            data, error_message = sbd_message.read()
-            if data:
-                data_list.append(data)
-            error_list.append(error_message)
+        data_list, error_list = _read_sbd_from_memory(sbd_folder)
+        # for file in sbd_folder.namelist():
+        #     sbd_message = SbdMessage(sbd_folder.open(file))
+        #     data, error_message = sbd_message.read()
+        #     if data:
+        #         data_list.append(data)
+        #     error_list.append(error_message)
 
     # else:
     #     for file in os.listdir(sbd_folder):
@@ -81,6 +82,7 @@ def compile_sbd(
 
     error_dict = _combine_dict_list(error_list)
 
+    #TODO: function
     if var_type == 'dict':
         data_dict = _combine_dict_list(data_list)
         if data_dict:
@@ -91,6 +93,7 @@ def compile_sbd(
                           "`start_date` and `end_date` are correct.")
         return data_dict, error_dict
 
+    #TODO: function
     elif var_type == 'pandas':
         data_df = pandas.DataFrame(data_list)
         error_df = pandas.DataFrame(error_dict)
@@ -115,6 +118,25 @@ def compile_sbd(
 
     else:
         raise ValueError("var_type can only be 'dict', 'pandas', or 'xarray'")
+
+
+def _read_sbd_from_memory(
+    sbd_folder: ZipFile,
+):
+    data_list = []
+    error_list = []
+
+    for file in sbd_folder.namelist():
+        sbd_message = SbdMessage(sbd_folder.open(file))
+        data, error_message = sbd_message.read()
+        if data:
+            data_list.append(data)
+        error_list.append(error_message)
+
+    return data_list, error_list
+
+
+def _read_sbd_from_local():
 
 
 #TODO: update to remove inplace
