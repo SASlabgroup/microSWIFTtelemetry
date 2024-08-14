@@ -1,5 +1,8 @@
 """
 MicroSWIFT variable and sensor type definitions.
+
+TODO: add note to update SENSOR_TYPES in message_handler.py when adding new types.
+TODO: map definitions to ncdf convention
 """
 
 __all__ = [
@@ -9,50 +12,61 @@ __all__ = [
     "SensorType50",
 ]
 
+import re
 import struct
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import Any, Type
+from typing import Any, Type, Optional
 
 import numpy as np
 
 
-# (variable name, description, units)
-VARIABLE_DEFINITIONS = [
-    ('datetime', "native Python datetime.datetime", "(datetime)"),
-    ('significant_height', "significant wave height", "(m)"),
-    ('peak_period', "peak period", "(s) "),
-    ('peak_direction', "peak ave direction", "(deg)"),
-    ('energy_density', "energy density", "(m^2/Hz)"),
-    ('frequency', "frequency", "(Hz)"),
-    ('a1', "first directional moment, positive E", "(-)"),
-    ('b1', "second directional moment, positive N", "(-)"),
-    ('a2', "third directional moment, positive E-W", "(-)"),
-    ('b2', "fourth directional moment, positive NE-SW", "(-)"),
-    ('check', "check factor", "(-)"),
-    ('u_mean', "mean GPS E-W velocity, positive E", "(m/s)"),
-    ('v_mean', "mean GPS N-S velocity, positive N", "(m/s)"),
-    ('z_mean', "mean GPS altitude, positive up", "(m)"),
-    ('latitude', "mean GPS latitude", "(decimal degrees)"),
-    ('longitude', "mean GPS longitude", "(decimal degrees)"),
-    ('temperature', "mean temperature", "(C)"),
-    ('salinity', "mean salinity", "(psu)"),
-    ('voltage', "mean battery voltage", "(V)"),
-    ('sensor_type', "Iridium sensor type definition", "(-)"),
-    ('com_port', "Iridium com port or # of replaced values", "(-)"),
-    ('payload_size', "Iridium message size", "(bytes)"),
-]
+# {variable name: (description, units)}
+VARIABLE_DEFINITIONS = {
+    'id': ("3-digit microSWIFT ID", "(-)"),
+    'datetime': ("native Python datetime.datetime", "(datetime)"),
+    'significant_height': ("significant wave height", "(m)"),
+    'peak_period': ("peak wave period", "(s) "),
+    'peak_direction': ("peak wave direction", "(deg)"),
+    'energy_density': ("wave energy density spectrum", "(m^2/Hz)"),
+    'frequency': ("spectral frequency bins", "(Hz)"),
+    'a1': ("first directional moment, positive E", "(-)"),
+    'b1': ("second directional moment, positive N", "(-)"),
+    'a2': ("third directional moment, positive E-W", "(-)"),
+    'b2': ("fourth directional moment, positive NE-SW", "(-)"),
+    'check': ("check factor", "(-)"),
+    'u_mean': ("mean GPS E-W velocity, positive E", "(m/s)"),
+    'v_mean': ("mean GPS N-S velocity, positive N", "(m/s)"),
+    'z_mean': ("mean GPS altitude, positive up", "(m)"),
+    'latitude': ("mean GPS latitude", "(decimal degrees)"),
+    'longitude': ("mean GPS longitude", "(decimal degrees)"),
+    'temperature': ("mean temperature", "(C)"),
+    'salinity': ("mean salinity", "(PSU)"),
+    'voltage': ("mean battery voltage", "(V)"),
+    'sensor_type': ("Iridium sensor type definition", "(-)"),
+    'com_port': ("Iridium com port or # of replaced values", "(-)"),
+    'payload_size': ("Iridium message size", "(bytes)"),
+}
 
 
 def init_swift_dict() -> dict:
     """ Initialize an empty SWIFT data dictionary. """
-    return {var[0]: None for var in VARIABLE_DEFINITIONS}
+    return {var: None for var in VARIABLE_DEFINITIONS.keys()}
+
+
+def id_from_filename(filename: str) -> Optional[str]:
+    id_match = re.search(r'(microSWIFT \d{3})', filename)
+    if id_match:
+        full_id = id_match.group(0)
+        return full_id.split(' ')[-1]
+    else:
+        return None
 
 
 class SensorType(ABC):
     """ TODO: """
     @abstractmethod
-    def __init__(self, sbd_content: bytes):
+    def __init__(self, sbd_content: bytes, sbd_filename: str):
         pass
 
     @property
@@ -68,8 +82,9 @@ class SensorType(ABC):
 class SensorType52(SensorType):
     definition = '<sbBheee42eee42b42b42b42b42Bffeeef'  # original v1 has `b` in third pos
 
-    def __init__(self, sbd_content: bytes):
+    def __init__(self, sbd_content: bytes, sbd_filename: str):
         self.sbd_content = sbd_content
+        self.sbd_filename = sbd_filename
 
     @property
     def expected_file_size(self) -> int:
@@ -80,6 +95,7 @@ class SensorType52(SensorType):
         data = struct.unpack(self.definition, self.sbd_content)
 
         swift = init_swift_dict()
+        swift['id'] = id_from_filename(self.sbd_filename)
         swift['sensor_type'] = data[1]
         swift['com_port'] = data[2]
         swift['payload_size'] = data[3]
@@ -112,8 +128,9 @@ class SensorType52(SensorType):
 class SensorType51(SensorType):
     definition = '<sbbhfff42fffffffffffiiiiii'
 
-    def __init__(self, sbd_content: bytes):
+    def __init__(self, sbd_content: bytes, sbd_filename: str):
         self.sbd_content = sbd_content
+        self.sbd_filename = sbd_filename
 
     @property
     def expected_file_size(self):
@@ -124,6 +141,7 @@ class SensorType51(SensorType):
         data = struct.unpack(self.definition, self.sbd_content)
 
         swift = init_swift_dict()
+        swift['id'] = id_from_filename(self.sbd_filename)
         swift['sensor_type'] = data[1]
         swift['com_port'] = data[2]
         swift['payload_size'] = data[3]
@@ -158,13 +176,14 @@ class SensorType51(SensorType):
 class SensorType50(SensorType):
     definition = '<sbbhfff42f42f42f42f42f42f42ffffffffiiiiii'
 
-    def __init__(self, sbd_content: bytes):
+    def __init__(self, sbd_content: bytes, sbd_filename: str):
         self.sbd_content = sbd_content
+        self.sbd_filename = sbd_filename
 
     @property
     def expected_file_size(self):
         return struct.calcsize(self.definition)
 
     def unpack(self) -> dict[str, Any]:
-        """ Unpack microSWIFT sensor type 51 into a dictionary. """
+        """ Unpack microSWIFT sensor type 50 into a dictionary. """
         raise NotImplementedError

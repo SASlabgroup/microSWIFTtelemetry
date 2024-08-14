@@ -12,7 +12,7 @@ from typing import IO, Union, Type
 from microSWIFTtelemetry.sbd import definitions
 from microSWIFTtelemetry.sbd.definitions import SensorType
 
-#TODO: move to definitions.py?  but needs to go at end
+
 SENSOR_TYPES: dict[int, Type[SensorType]] = {
     50: definitions.SensorType50,
     51: definitions.SensorType51,
@@ -57,7 +57,7 @@ class SbdMessage:
         """ Get sensor type class. """
         if self._sensor_type is None:
             sensor_type = self.get_sensor_type_by_id()
-            self._sensor_type = sensor_type(self.file_content)
+            self._sensor_type = sensor_type(self.file_content, self.file.name)
         return self._sensor_type
 
     def get_sensor_type_by_id(self) -> Type[SensorType]:

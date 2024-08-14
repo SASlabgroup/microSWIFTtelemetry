@@ -1,5 +1,5 @@
 """
-Testing of pull_telemetry.py module
+Testing of telemetry.py module
 
 Helpful links:
 https://realpython.com/testing-third-party-apis-with-mocks/#your-first-mock
@@ -20,13 +20,13 @@ import pandas as pd
 # from microSWIFTtelemetry import sbd
 
 # as local imports
-from microSWIFTtelemetry.pull_telemetry import pull_telemetry_as_var, pull_telemetry_as_json
+from microSWIFTtelemetry.telemetry import pull_telemetry_as_var, pull_telemetry_as_json
 from microSWIFTtelemetry.sbd.definitions import VARIABLE_DEFINITIONS
 from microSWIFTtelemetry.sbd import to_pandas_datetime_index
 
 
-class TestPullTelemetry(unittest.TestCase):
-    """ Unit tests for pull_telemetry.py """
+class TestTelemetry(unittest.TestCase):
+    """ Unit tests for telemetry.py """
 
     def setUp(self):
         """ Setup sample data to test on """
@@ -405,7 +405,7 @@ class TestPullTelemetry(unittest.TestCase):
             'error': [None]
         }
 
-    @patch('microSWIFTtelemetry.pull_telemetry.urlopen')
+    @patch('microSWIFTtelemetry.telemetry.urlopen')
     def test_pull_telemetry_as_json(self, mock_urlopen):
         """ Test pull_telemetry_as_var with var_type='json' """
 
@@ -423,7 +423,7 @@ class TestPullTelemetry(unittest.TestCase):
         self.assertIsInstance(response, dict)
         self.assertDictEqual(response, expected_response)
 
-    @patch('microSWIFTtelemetry.pull_telemetry.urlopen')
+    @patch('microSWIFTtelemetry.telemetry.urlopen')
     def test_pull_telemetry_as_var_dict(self, mock_urlopen):
         """ Test pull_telemetry_as_var with var_type='dict' """
 
@@ -454,7 +454,7 @@ class TestPullTelemetry(unittest.TestCase):
         for key in ['file_name', 'error']:
             np.array_equal(errors[key], expected_errors[key])
 
-    @patch('microSWIFTtelemetry.pull_telemetry.urlopen')
+    @patch('microSWIFTtelemetry.telemetry.urlopen')
     def test_pull_telemetry_as_var_dict_2(self, mock_urlopen):
         """ Test pull_telemetry_as_var with var_type='dict' """
 
@@ -484,14 +484,14 @@ class TestPullTelemetry(unittest.TestCase):
         for key in ['file_name', 'error']:
             np.array_equal(errors[key], expected_errors[key])
 
-    @patch('microSWIFTtelemetry.pull_telemetry.urlopen')
+    @patch('microSWIFTtelemetry.telemetry.urlopen')
     def test_pull_telemetry_as_var_pandas(self, mock_urlopen):
         """ Test pull_telemetry_as_var with var_type='pandas' """
 
         mock_urlopen.return_value.read.return_value = self.sample_zipped_sbd_file
 
         response, errors = pull_telemetry_as_var(
-            buoy_id='019',
+            buoy_ids=['019'],
             start_date=datetime(2022,9,26,21),
             end_date=datetime(2022,9,26,22),
             var_type='pandas',
@@ -505,7 +505,7 @@ class TestPullTelemetry(unittest.TestCase):
         pd.testing.assert_frame_equal(response, expected_response)
         pd.testing.assert_frame_equal(errors, expected_errors)
 
-    @patch('microSWIFTtelemetry.pull_telemetry.urlopen')
+    @patch('microSWIFTtelemetry.telemetry.urlopen')
     def test_pull_telemetry_as_var_pandas_2(self, mock_urlopen):
         """ Test pull_telemetry_as_var with var_type='pandas' """
 
@@ -526,7 +526,31 @@ class TestPullTelemetry(unittest.TestCase):
         pd.testing.assert_frame_equal(response, expected_response)
         pd.testing.assert_frame_equal(errors, expected_errors)
 
-    @patch('microSWIFTtelemetry.pull_telemetry.urlopen')
+    # @patch('microSWIFTtelemetry.telemetry.urlopen')
+    # def test_pull_telemetry_as_var_pandas_multi(self, mock_urlopen):
+    def test_pull_telemetry_as_var_pandas_multi(self):
+        """
+        Test pull_telemetry_as_var with var_type='pandas' and multiple buoys.
+        """
+        #TODO: UPDATE MOCK
+        # mock_urlopen.return_value.read.return_value = self.sample_zipped_sbd_file
+        #TODO: test if tzinfo works
+        response, errors = pull_telemetry_as_var(
+            buoy_ids=['079', '087', '104', '105', '106'],
+            start_date=datetime(2024, 7, 20, 0, 0, 0),
+            end_date=datetime(2024, 7, 30, 0, 0, 0),
+            var_type='pandas',
+            return_errors=True,
+        )
+
+        expected_response = pd.DataFrame(self.sample_data)
+        expected_errors = pd.DataFrame(self.sample_data_errors)
+
+        to_pandas_datetime_index(expected_response)
+        pd.testing.assert_frame_equal(response, expected_response)
+        pd.testing.assert_frame_equal(errors, expected_errors)
+
+    @patch('microSWIFTtelemetry.telemetry.urlopen')
     def test_pull_telemetry_as_var_dict_empty(self, mock_urlopen):
         """
         Test pull_telemetry_as_var with var_type='dict' when the
@@ -550,7 +574,7 @@ class TestPullTelemetry(unittest.TestCase):
         self.assertDictEqual(response, expected_response)
         self.assertDictEqual(errors, expected_errors)
 
-    @patch('microSWIFTtelemetry.pull_telemetry.urlopen')
+    @patch('microSWIFTtelemetry.telemetry.urlopen')
     def test_pull_telemetry_as_var_empty_pandas_empty(self, mock_urlopen):
         """
         Test pull_telemetry_as_var with var_type='pandas' when the
