@@ -14,7 +14,7 @@ import json
 import os
 
 from datetime import datetime, timezone
-from typing import Dict, IO, Union, Literal, List, Optional
+from typing import Any, Dict, IO, Union, Literal, List, Optional
 from urllib.request import urlopen
 from urllib.parse import urlencode, quote_plus
 from zipfile import ZipFile
@@ -47,7 +47,7 @@ def create_request(
             a KML of drift tracks.
 
     Returns:
-        str: URL-enoded (utf8) request to be sent to the server.
+        str: URL-encoded (utf8) request to be sent to the server.
     """
 
     # Convert dates to strings:
@@ -119,12 +119,9 @@ def pull_telemetry_as_var(
     FORMAT_OUT: Literal['zip'] = 'zip'
     BASE_URL = 'http://swiftserver.apl.washington.edu/services/buoy?action=get_data&'
 
-    # Catch any IDs provided as a string (which are also iterable).
-    if isinstance(buoy_ids, str):
-        buoy_ids = [buoy_ids]
-
-    if end_date is None:
-        end_date = datetime.now(timezone.utc)
+    # Handle inputs.
+    buoy_ids = _handle_scalar_buoy_id(buoy_ids)
+    end_date = _handle_empty_end_date(end_date)
 
     # Query the SWIFT server and collect the SBD messages for each ID.
     sbd_dict: Dict[str, IO[bytes]] = {}
@@ -184,15 +181,10 @@ def pull_telemetry_as_zip(
     BASE_URL = 'http://swiftserver.apl.washington.edu/services/buoy?action=get_data&'
     DATE_STR_FORMAT = '%Y-%m-%dT%HZ'
 
-    # Catch any IDs provided as a string (which are also iterable).
-    if isinstance(buoy_ids, str):
-        buoy_ids = [buoy_ids]
-
-    if end_date is None:
-        end_date = datetime.now(timezone.utc)
-
-    if local_path is None:
-        local_path = os.getcwd()
+    # Handle inputs.
+    buoy_ids = _handle_scalar_buoy_id(buoy_ids)
+    end_date = _handle_empty_end_date(end_date)
+    local_path = _handle_empty_local_path(local_path)
 
     # Query the SWIFT server and write zip files to the local machine.
     for buoy_id in buoy_ids:
@@ -250,12 +242,9 @@ def pull_telemetry_as_json(
     FORMAT_OUT: Literal['json'] = 'json'
     BASE_URL = 'http://swiftserver.apl.washington.edu/kml?action=kml&'
 
-    # Catch any IDs provided as a string (which are also iterable).
-    if isinstance(buoy_ids, str):
-        buoy_ids = [buoy_ids]
-
-    if end_date is None:
-        end_date = datetime.now(timezone.utc)
+    # Handle inputs.
+    buoy_ids = _handle_scalar_buoy_id(buoy_ids)
+    end_date = _handle_empty_end_date(end_date)
 
     # Query the SWIFT server for json output and save it in a dict keyed by ID.
     json_dict: Dict[str, dict] = {}
@@ -306,15 +295,10 @@ def pull_telemetry_as_kml(
     BASE_URL = 'http://swiftserver.apl.washington.edu/kml?action=kml&'
     DATE_STR_FORMAT = '%Y-%m-%dT%HZ'
 
-    # Catch any IDs provided as a string (which are also iterable).
-    if isinstance(buoy_ids, str):
-        buoy_ids = [buoy_ids]
-
-    if end_date is None:
-        end_date = datetime.now(timezone.utc)
-
-    if local_path is None:
-        local_path = os.getcwd()
+    # Handle inputs.
+    buoy_ids = _handle_scalar_buoy_id(buoy_ids)
+    end_date = _handle_empty_end_date(end_date)
+    local_path = _handle_empty_local_path(local_path)
 
     # Query the SWIFT server and write KML files to the local machine.
     for buoy_id in buoy_ids:
@@ -343,10 +327,30 @@ def _extract_zip(zip_folder: IO[bytes]) -> Dict[str, IO[bytes]]:
     return {name: opened_zip.open(name) for name in opened_zip.namelist()}
 
 
-def _merge_dict(dict: dict, other: dict):
+def _merge_dict(d: dict, other: dict):
     """ Merge two dicts (this syntax only works with 3.9+). """
-    return dict | other
+    return d | other
 
+
+def _handle_scalar_buoy_id(buoy_ids: Any) -> List[str]:
+    """ Catch any IDs provided as a string (which are also iterable) """
+    if isinstance(buoy_ids, str):
+        buoy_ids = [buoy_ids]
+    return buoy_ids
+
+
+def _handle_empty_end_date(end_date: Optional[datetime]) -> datetime:
+    """ Replace empty end_date with the current UTC time. """
+    if end_date is None:
+        end_date = datetime.now(timezone.utc)
+    return end_date
+
+
+def _handle_empty_local_path(local_path: Optional[str]) -> str:
+    """ Replace empty local_path with the current working directory. """
+    if local_path is None:
+        local_path = os.getcwd()
+    return local_path
 
 def read_telemetry_from_file():
     # TODO: implement
