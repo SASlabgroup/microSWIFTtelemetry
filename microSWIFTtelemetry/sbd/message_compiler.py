@@ -1,19 +1,18 @@
 """
-Module for compiling microSWIFT short burst data (SBD) files.
+Module for compiling microSWIFT short burst data (SBD) files into objects.
 
-TODO:
-- to_netcdf function with nc compliance
+TODO: to_netcdf function with nc compliance
 """
 
 __all__ = [
     "compile_sbd",
+    "_set_pandas_datetime_index",
 ]
 
 import warnings
 from collections import defaultdict
 from collections.abc import KeysView
 from typing import Any, Union, Dict, Literal, List, IO
-from zipfile import ZipFile
 
 import numpy as np
 import pandas
@@ -39,7 +38,7 @@ def compile_sbd(
     specified by `var_type`.
 
     Args:
-        sbd_dict (Dict[str, IO[bytes]]): Dictionary containing filenames and
+        sbd_dict (Dict[str, IO[bytes]]): Dictionary of filenames and
             SBD content.
         var_type (Literal['dict', 'pandas', 'xarray']): The variable type to
             return. Defaults to 'dict'.
@@ -99,8 +98,8 @@ def _compile_dict(
         data_dict = _sort_dict(data_dict)
     else:
         warnings.warn("Empty dictionary; if you expected data, make sure "
-                        "the `buoy_id` is a valid microSWIFT ID and that "
-                        "`start_date` and `end_date` are correct.")
+                      "the `buoy_id` is a valid microSWIFT ID and that "
+                      "`start_date` and `end_date` are correct.")
     return data_dict, error_dict
 
 
@@ -120,8 +119,8 @@ def _compile_pandas(
             data_df = _set_pandas_datetime_index(data_df)
     else:
         warnings.warn("Empty DataFrame; if you expected data, make sure "
-                        "the `buoy_id` is a valid microSWIFT ID and that "
-                        "`start_date` and `end_date` are correct.")
+                      "the `buoy_id` is a valid microSWIFT ID and that "
+                      "`start_date` and `end_date` are correct.")
 
     if not error_df.empty:
         error_df = error_df.sort_values(by='file_name')
@@ -159,7 +158,7 @@ def _compile_xarray(
     scalar_shape = (t,)
     spectral_shape = (t, f)
 
-    # Build the dictionary of data variables based on the array shapes.
+    # Build dictionary of data variables based on the array shapes.
     data_vars = {}
     variable_keys = _key_difference(VARIABLE_DEFINITIONS.keys(), coords.keys())
     for var in variable_keys:
