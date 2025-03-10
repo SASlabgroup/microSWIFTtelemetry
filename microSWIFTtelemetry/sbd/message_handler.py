@@ -1,11 +1,10 @@
 """
-Module for reading microSWIFT short burst data (SBD) files.
-
-TODO:
-- support for sensor type 50
+Module for handling microSWIFT short burst data (SBD) messages.
 """
 
-#TODO: rename?
+__all__ = [
+    "SbdMessage",
+]
 
 from typing import IO, Union, Type
 
@@ -21,7 +20,27 @@ SENSOR_TYPES: dict[int, Type[SensorType]] = {
 
 
 class SbdMessage:
-    """ TODO: """
+    """The summary line for a class docstring should fit on one line.
+
+    If the class has public attributes, they may be documented here
+    in an ``Attributes`` section and follow the same formatting as a
+    function's ``Args`` section. Alternatively, attributes may be documented
+    inline with the attribute's declaration (see __init__ method below).
+
+    Properties created with the ``@property`` decorator should be documented
+    in the property's getter method.
+
+    Attributes:
+        attr1 (str): Description of `attr1`.
+        attr2 (:obj:`int`, optional): Description of `attr2`.
+
+    Raises:
+        ValueError: _description_
+        ValueError: _description_
+
+    Returns:
+        _type_: _description_
+    """
     PAYLOAD_START: int = 0  # (no header) otherwise it is: = payload_data.index(b':')
 
     def __init__(self, file: IO[bytes]):
