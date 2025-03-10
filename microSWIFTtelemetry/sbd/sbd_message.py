@@ -35,8 +35,8 @@ class SbdMessage:
         attr2 (:obj:`int`, optional): Description of `attr2`.
 
     Raises:
-        ValueError: _description_
-        ValueError: _description_
+        ValueError: _description_  # TODO:
+        ValueError: _description_  # TODO:
 
     Returns:
         _type_: _description_
@@ -96,7 +96,7 @@ class SbdMessage:
 
     def read(self) -> tuple[dict, dict]:
         """
-        Read microSWIFT short burst data (SBD) messages into dictonaries
+        Read microSWIFT short burst data (SBD) messages into dictionaries
         containing data and errors.
 
         Note:

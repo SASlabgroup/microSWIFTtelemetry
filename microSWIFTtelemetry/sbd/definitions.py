@@ -1,7 +1,7 @@
 """
 MicroSWIFT variable and sensor type definitions.
 
-TODO: add note to update SENSOR_TYPES in message_handler.py when adding new types.
+TODO: add note to update SENSOR_TYPES in _sbd.py when adding new types.
 TODO: map definitions to ncdf convention
 """
 
