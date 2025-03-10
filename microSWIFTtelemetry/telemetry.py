@@ -36,7 +36,7 @@ def create_request(
     format_out: Literal['zip', 'json', 'kml'],
 ) -> str:
     """
-    Create a URL-encoded request.
+    Create a URL-encoded SWIFT server request.
 
     Arguments:
         buoy_id (str): microSWIFT ID (e.g. '043')
@@ -49,10 +49,11 @@ def create_request(
     Returns:
         str: URL-encoded (utf8) request to be sent to the server.
     """
+    STR_FORMAT = '%Y-%m-%dT%H:%M:%S'
 
     # Convert dates to strings:
-    start_date_str = start_date.strftime('%Y-%m-%dT%H:%M:%S')
-    end_date_str = end_date.strftime('%Y-%m-%dT%H:%M:%S')
+    start_date_str = start_date.strftime(STR_FORMAT)
+    end_date_str = end_date.strftime(STR_FORMAT)
 
     # Pack into a payload dictionary:
     payload = {
@@ -61,7 +62,6 @@ def create_request(
         'end': end_date_str.encode('utf8'),
         'format': format_out.encode('utf8')
     }
-
     return urlencode(payload, quote_via=quote_plus)
 
 
@@ -86,7 +86,7 @@ def pull_telemetry_as_var(
         start_date (datetime): Query start date in UTC.
         end_date (datetime, optional): Query end date in UTC. Defaults to None
             which is replaced with the current UTC time.
-        var_type (Literal['dict', 'pandas', 'xarray'], optional): The variable
+        var_type (Literal['dict', 'pandas', 'xarray'], optional): Variable
             type to return. Defaults to 'dict'.
         return_errors (bool, optional): If True, return error messages.
             Defaults to False.
@@ -351,6 +351,7 @@ def _handle_empty_local_path(local_path: Optional[str]) -> str:
     if local_path is None:
         local_path = os.getcwd()
     return local_path
+
 
 def read_telemetry_from_file():
     # TODO: implement
