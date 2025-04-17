@@ -22,7 +22,7 @@ import pandas as pd
 # as local imports
 from microSWIFTtelemetry.telemetry import pull_telemetry_as_var, pull_telemetry_as_json
 from microSWIFTtelemetry.sbd.definitions import VARIABLE_DEFINITIONS
-from microSWIFTtelemetry.sbd import to_pandas_datetime_index
+from microSWIFTtelemetry.sbd import _set_pandas_datetime_index, SbdMessage
 
 
 class TestTelemetry(unittest.TestCase):
@@ -164,6 +164,32 @@ class TestTelemetry(unittest.TestCase):
             b'00:00-end-2023-07-09T06:00:00/buoy-microSWIFT 012-09Jul2023 0535'
             b'12.sbdPK\x05\x06\x00\x00\x00\x00\x01\x00\x01\x00\x9c\x00\x00\x00'
             b'\xd3\x01\x00\x00\x00\x00'
+        )
+
+
+
+        self.sample_sbd_file_name_type52 = (
+            r'buoy-microSWIFT 079-start-2024-07-23T19:00:00-end-2024-07-23T'
+            '20:00:00/buoy-microSWIFT 079-23Jul2024 193512.sbd'
+        )
+        self.sample_sbd_file_content_type52 = (
+            b'74\x00G\x01{.\xecG&Y(%Z#*$\xf0"\x89 \xf9 \xe7\x1e\xe3\x1d\xe5'
+            b'\x1a\x19\x19t\x18\x10\x16\xeb\x15\xd6\x15\x1d\x14V\x12)\x13a'
+            b'\x124\x12=\x11\xd7\x10\xe0\x10\t\x10\r\x0f\'\x10z\r\xb7\r\xc1'
+            b'\x0c\xf1\x0c\x1f\r[\r%\n\x88\x0b\x10\x0cq\t1\n\x04\n\x04\t\x8b'
+            b'\x08<\x08\x8b\x08Z\x08\x00!\xd87\xf5\xfc\x02\xfb\xf1\xf8\x03\x08'
+            b'\x04\xf1\x03\xff\x02\xf6\x03\x0c\xff\x0c\xf2\x04\x06\xf8\xf5\x06'
+            b'\xff\x10\x00\xfd\x08\xfa\x07\xfe\x05\n\xff\x06\xfc\x0b\xfa\xfd'
+            b'\xfc\x06\x00\xf4\x02\xf6\x06\x01\xfd\xff\xfd\x06\xf7\x06\x06 \n'
+            b'\xff\xeb\xfd\x0c\x01\xfc\xff\x00\xf3\xf0\xfc\r\x0b\xf2\xf8\xeb'
+            b'\xf6\xe4\xfc\x00\xf2\x02\xfe\x05\x06\xf7\xef\xf6\xe0\xd0\xe0\xda'
+            b'\xc9\xde\xec\xe2\xe6\xf3\xe1\n\xe0\xf2\xe3\xeb\xf1\xe5\xe4\xd6'
+            b'\xf4\xe8\xea\xea\xf8\xe9\xe5\xec\xe3\xf3\xee\xee\xf1\xef\x02\xef'
+            b'\xf2\xf2\x13\xfc\x03\r\xfd\x15\xfa\xff\xfd\xeb\xfa\x00\xfa\xfb'
+            b'\x05\x06\xe9\xf3\x0e\xf0\x01\xe2\x0c\x0e\xf7\x01\x06\x1e\x11\x0c'
+            b'\xfd\xfd\r\x02\x0b\x16\xfe\xf3\xff\xe2\x06\xff\xfb\x07\x0c1?*3/!'
+            b'<*#-3OG6-EB//+)(/:&+\x1a%\x1e/\x1f5!"7&\x1e\x1d(,%\x17\xf3\x9e>B'
+            b'\xaf\xa4\xf4\xc2\xe2p\xe2p\xc7I\x0c@\xcdN'
         )
 
         # Sample data representing the expected response from read_sbd()
@@ -405,6 +431,118 @@ class TestTelemetry(unittest.TestCase):
             'error': [None]
         }
 
+        self.sample_data_type52 = {
+            'id': '079',
+            'datetime': datetime(2024, 7, 23, 19, 35, 28, tzinfo=timezone.utc),
+            'significant_height': 0.10125732421875,
+            'peak_period': 7.921875,
+            'peak_direction': 164.75,
+            'energy_density': np.array([
+                0.0201416 , 0.01435852, 0.01626587, 0.0135498 , 0.00885773,
+                0.00971222, 0.00674057, 0.00574875, 0.00336647, 0.00248909,
+                0.00217438, 0.0014801 , 0.00144482, 0.00142479, 0.00100422,
+                0.00077343, 0.00087404, 0.00077868, 0.00075722, 0.00063944,
+                0.0005908 , 0.00059509, 0.00049257, 0.00043035, 0.00050688,
+                0.00033426, 0.00034881, 0.00029016, 0.0003016 , 0.00031257,
+                0.00032687, 0.00018752, 0.00022984, 0.00024796, 0.00016606,
+                0.00018895, 0.00018358, 0.00015306, 0.00013864, 0.00012922,
+                0.00013864, 0.0001328
+            ]),
+            'frequency': np.array([
+                0.00976562, 0.02148438, 0.03320312, 0.04492188, 0.05664062,
+                0.06835938, 0.08007812, 0.09179688, 0.10351562, 0.11523438,
+                0.12695312, 0.13867188, 0.15039062, 0.16210938, 0.17382812,
+                0.18554688, 0.19726562, 0.20898438, 0.22070312, 0.23242188,
+                0.24414062, 0.25585938, 0.26757812, 0.27929688, 0.29101562,
+                0.30273438, 0.31445312, 0.32617188, 0.33789062, 0.34960938,
+                0.36132812, 0.37304688, 0.38476562, 0.39648438, 0.40820312,
+                0.41992188, 0.43164062, 0.44335938, 0.45507812, 0.46679688,
+                0.47851562, 0.49023438
+            ]),
+            'a1': np.array([
+                -0.11, -0.04,  0.02, -0.05, -0.15, -0.08,  0.03,  0.08,  0.04,
+                -0.15,  0.03, -0.01,  0.02, -0.1 ,  0.03,  0.12, -0.01,  0.12,
+                -0.14,  0.04,  0.06, -0.08, -0.11,  0.06, -0.01,  0.16,  0.  ,
+                -0.03,  0.08, -0.06,  0.07, -0.02,  0.05,  0.1 , -0.01,  0.06,
+                -0.04,  0.11, -0.06, -0.03, -0.04,  0.06
+            ]),
+            'b1': np.array([
+                 0.  , -0.12,  0.02, -0.1 ,  0.06,  0.01, -0.03, -0.01, -0.03,
+                 0.06, -0.09,  0.06,  0.06,  0.32,  0.1 , -0.01, -0.21, -0.03,
+                 0.12,  0.01, -0.04, -0.01,  0.  , -0.13, -0.16, -0.04,  0.13,
+                 0.11, -0.14, -0.08, -0.21, -0.1 , -0.28, -0.04,  0.  , -0.14,
+                 0.02, -0.02,  0.05,  0.06, -0.09, -0.17
+            ]),
+            'a2': np.array([
+                -0.1 , -0.32, -0.48, -0.32, -0.38, -0.55, -0.34, -0.2 , -0.3 ,
+                -0.26, -0.13, -0.31,  0.1 , -0.32, -0.14, -0.29, -0.21, -0.15,
+                -0.27, -0.28, -0.42, -0.12, -0.24, -0.22, -0.22, -0.08, -0.23,
+                -0.27, -0.2 , -0.29, -0.13, -0.18, -0.18, -0.15, -0.17,  0.02,
+                -0.17, -0.14, -0.14,  0.19, -0.04,  0.03
+            ]),
+            'b2': np.array([
+                 0.13, -0.03,  0.21, -0.06, -0.01, -0.03, -0.21, -0.06,  0.  ,
+                -0.06, -0.05,  0.05,  0.06, -0.23, -0.13,  0.14, -0.16,  0.01,
+                -0.3 ,  0.12,  0.14, -0.09,  0.01,  0.06,  0.3 ,  0.17,  0.12,
+                -0.03, -0.03,  0.13,  0.02,  0.11,  0.22, -0.02, -0.13, -0.01,
+                -0.3 ,  0.06, -0.01, -0.05,  0.07,  0.12
+            ]),
+            'check': np.array([
+                4.9, 6.3, 4.2, 5.1, 4.7, 3.3, 6. , 4.2, 3.5, 4.5, 5.1, 7.9, 7.1,
+                5.4, 4.5, 6.9, 6.6, 4.7, 4.7, 4.3, 4.1, 4. , 4.7, 5.8, 3.8, 4.3,
+                2.6, 3.7, 3. , 4.7, 3.1, 5.3, 3.3, 3.4, 5.5, 3.8, 3. , 2.9, 4. ,
+                4.4, 3.7, 2.3
+            ]),
+            'u_mean': None,
+            'v_mean': None,
+            'z_mean': None,
+            'latitude': 47.65522384643555,
+            'longitude': -122.32164764404297,
+            'temperature': 10000.0,
+            'salinity': 10000.0,
+            'voltage': 11.5546875,
+            'sensor_type': 52,
+            'com_port': 0,
+            'payload_size': 327
+        }
+        self.sample_data_errors_type52 = {
+            'file_name': (
+                'buoy-microSWIFT 079-start-2024-07-23T19:00:00-end-2024-07-23'
+                'T20:00:00/buoy-microSWIFT 079-23Jul2024 193512.sbd'
+            ),
+            'error': None
+        }
+
+
+    @patch('microSWIFTtelemetry.sbd.sbd_message.zipfile.ZipExtFile')
+    def test_sbd_message_handler(self, mock_sbd_file):
+        """ Test pull_telemetry_as_var with var_type='json' """
+        # {name: opened_zip.open(name) for name in opened_zip.namelist()}
+        mock_sbd_file.name = self.sample_sbd_file_name_type52
+        mock_sbd_file.read.return_value = self.sample_sbd_file_content_type52
+
+        sbd_message = SbdMessage(mock_sbd_file)
+        data, errors = sbd_message.read()
+
+        expected_data = self.sample_data_type52
+        expected_errors = self.sample_data_errors_type52
+
+        self.assertIsNotNone(data)
+        self.assertIsInstance(data, dict)
+        self.assertEqual(data.keys(), expected_data.keys())
+        for variable in VARIABLE_DEFINITIONS.keys():
+            if isinstance(data[variable], np.ndarray):
+                self.assertTrue(
+                    np.allclose(data[variable], expected_data[variable])
+                )
+            else:
+                self.assertEqual(data[variable], expected_data[variable])
+
+        self.assertIsInstance(expected_errors, dict)
+        self.assertEqual(errors.keys(), expected_errors.keys())
+        for key in ['file_name', 'error']:
+            self.assertEqual(errors[key], expected_errors[key])
+
     @patch('microSWIFTtelemetry.telemetry.urlopen')
     def test_pull_telemetry_as_json(self, mock_urlopen):
         """ Test pull_telemetry_as_var with var_type='json' """
@@ -501,7 +639,7 @@ class TestTelemetry(unittest.TestCase):
         expected_response = pd.DataFrame(self.sample_data)
         expected_errors = pd.DataFrame(self.sample_data_errors)
 
-        to_pandas_datetime_index(expected_response)
+        _set_pandas_datetime_index(expected_response)
         pd.testing.assert_frame_equal(response, expected_response)
         pd.testing.assert_frame_equal(errors, expected_errors)
 
@@ -522,7 +660,7 @@ class TestTelemetry(unittest.TestCase):
         expected_response = pd.DataFrame(self.sample_data_2)
         expected_errors = pd.DataFrame(self.sample_data_errors_2)
 
-        to_pandas_datetime_index(expected_response)
+        _set_pandas_datetime_index(expected_response)
         pd.testing.assert_frame_equal(response, expected_response)
         pd.testing.assert_frame_equal(errors, expected_errors)
 
@@ -546,7 +684,7 @@ class TestTelemetry(unittest.TestCase):
         expected_response = pd.DataFrame(self.sample_data)
         expected_errors = pd.DataFrame(self.sample_data_errors)
 
-        to_pandas_datetime_index(expected_response)
+        _set_pandas_datetime_index(expected_response)
         pd.testing.assert_frame_equal(response, expected_response)
         pd.testing.assert_frame_equal(errors, expected_errors)
 
