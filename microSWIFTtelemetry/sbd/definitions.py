@@ -35,7 +35,7 @@ def get_sensor_type_definition(sensor_type: str, file_size: int) -> str:
         '50': '<sbbhfff42f42f42f42f42f42f42ffffffffiiiiii',
         '51': '<sbbhfff42fffffffffffiiiiii',
         '52': '<sbBheee42eee42b42b42b42b42Bffeeef',  # original v1 has `b` in third pos
-        '52-2': '<sbbheee42eee42b42b42b42b42BIIeeeII',  # Phil Mar 2025 edits
+        '52-2': '<sbbheee42eee42b42b42b42b42BIIeeefI',  # Phil Mar 2025 edits
         '53': '<sbbH' + 3 * 'iiiiIIHH',
         '54': '<sbbH' + 6 * 'iiiiII13H',
     }
