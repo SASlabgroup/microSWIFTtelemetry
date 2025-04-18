@@ -8,7 +8,7 @@ TODO:
 import struct
 import warnings
 from datetime import datetime, timezone
-from typing import Tuple
+from typing import Tuple, Union
 
 import numpy as np
 
@@ -52,8 +52,8 @@ def unpack_sbd(file_name: str, file_content: bytes) -> Tuple:
     sensor_type = get_sensor_type(file_content)
 
     if sensor_type:
-        payload_struct = get_sensor_type_definition(sensor_type)
         file_size = len(file_content)
+        payload_struct = get_sensor_type_definition(sensor_type, file_size)
         expected_file_size = struct.calcsize(payload_struct)
         if file_size == expected_file_size:
             data = struct.unpack(payload_struct, file_content)
@@ -70,10 +70,14 @@ def unpack_sbd(file_name: str, file_content: bytes) -> Tuple:
         error_message['error'] = _rstrip_null(file_content)  # decode('ascii')
 
     if data:
-        if sensor_type == 51:
+        if sensor_type == '51':
             swift = unpack_sensor_type_51(data)
-        elif sensor_type == 52:
+        elif sensor_type == '52':
             swift = unpack_sensor_type_52(data)
+        elif sensor_type == '53':
+            swift = {}  # TODO: ignore for now, but implement later
+        elif sensor_type == '54':
+            swift = {}  # TODO: ignore for now, but implement later
         else:
             raise NotImplementedError(f'The specified sensor type '
                                       f'({sensor_type}) is not supported.')
@@ -83,7 +87,7 @@ def unpack_sbd(file_name: str, file_content: bytes) -> Tuple:
     return swift, error_message
 
 
-def get_sensor_type(file_content: bytes) -> int:
+def get_sensor_type(file_content: bytes) -> Union[str, None]:
     """
     Determine sensor type from an SBD message.
 
@@ -96,13 +100,13 @@ def get_sensor_type(file_content: bytes) -> int:
         file_content (bytes): binary SBD message
 
     Returns:
-        (int): int corresponding to sensor type
+        (str): str corresponding to sensor type
     """
     payload_type = \
         file_content[PAYLOAD_START:PAYLOAD_START+1].decode(errors='replace')
 
     if payload_type == PAYLOAD_TYPE:
-        sensor_type = ord(file_content[PAYLOAD_START+1:PAYLOAD_START+2])
+        sensor_type = str(ord(file_content[PAYLOAD_START+1:PAYLOAD_START+2]))
     else:
         sensor_type = None
 

@@ -7,16 +7,18 @@ __all__ = [
     "get_variable_definitions",
 ]
 
+import struct
 from typing import List, Tuple
 
 
-def get_sensor_type_definition(sensor_type: int) -> str:
+def get_sensor_type_definition(sensor_type: str, file_size: int) -> str:
     """
     Dictionary of microSWIFT sensor type definitions;
     see https://github.com/alexdeklerk/microSWIFT.
 
     Arguments:
-        - sensor_type (int), sensor type defintion to return
+        - sensor_type (str), sensor type definition to return
+        - file_size (int), size of the SBD file in bytes
 
     Raises:
         - ValueError, raise error if the sensor type is not one of the
@@ -24,16 +26,23 @@ def get_sensor_type_definition(sensor_type: int) -> str:
                 parsed on the sever.
 
     Returns:
-        - (str), sensor type defintion in Python's struct module format
+        - (str), sensor type definition in Python's struct module format
             * See: https://docs.python.org/3/library/struct.html
     """
 
     # Define the sensor type using Python's struct module format
     PAYLOAD_DEFINITIONS = {
-        50: '<sbbhfff42f42f42f42f42f42f42ffffffffiiiiii',
-        51: '<sbbhfff42fffffffffffiiiiii',
-        52: '<sbBheee42eee42b42b42b42b42Bffeeef',  # original v1 has `b` in third pos
+        '50': '<sbbhfff42f42f42f42f42f42f42ffffffffiiiiii',
+        '51': '<sbbhfff42fffffffffffiiiiii',
+        '52': '<sbBheee42eee42b42b42b42b42Bffeeef',  # original v1 has `b` in third pos
+        '52-2': '<sbbheee42eee42b42b42b42b42BIIeeeII',  # Phil Mar 2025 edits
+        '53': '<sbbH' + 3 * 'iiiiIIHH',
+        '54': '<sbbH' + 6 * 'iiiiII13H',
     }
+
+    # Accommodate modified sensor type 52 definition past Nov 2024
+    if sensor_type == '52' and file_size == struct.calcsize(PAYLOAD_DEFINITIONS['52-2']):
+        sensor_type = '52-2'
 
     if sensor_type not in PAYLOAD_DEFINITIONS.keys():
         raise ValueError((f'sensor_type not defined - can only be value in:'
