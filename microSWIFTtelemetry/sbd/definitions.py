@@ -82,7 +82,7 @@ class SensorType(ABC):
 class SensorType52(SensorType):
     # Sensor type 52 modified early 2025 ("Post" has 4 extra bytes.)
     definition_pre_2025 = '<sbBheee42eee42b42b42b42b42Bffeeef'  # original v1 has `b` in third pos
-    definition_post_2025 = '<sbbheee42eee42b42b42b42b42BIIeeefI'
+    definition_post_2025 = '<sbbheee42eee42b42b42b42b42BffeeefI'
 
     def __init__(self, sbd_content: bytes, sbd_filename: str):
         self.sbd_content = sbd_content
