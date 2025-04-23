@@ -20,6 +20,7 @@ SENSOR_TYPES: dict[int, Type[SensorType]] = {
 
 
 class SbdMessage:
+    # TODO: add docstring
     """The summary line for a class docstring should fit on one line.
 
     If the class has public attributes, they may be documented here
@@ -47,52 +48,31 @@ class SbdMessage:
         self.file = file
         self.file_content = _rstrip_null(self.file.read())
         self.file_size = len(self.file_content)
-        self._payload_type_id: Union[str, None] = None  # TODO: are these types needed?
+        self._payload_type_id: Union[str, None] = None  # TODO: just put methods here?
         self._sensor_type_id: Union[int, None] = None
         self._sensor_type: Union[SensorType, None] = None
 
     @property
     def payload_type_id(self) -> Union[str, None]:
-        """ TODO: """
+        """ Cache and return this message's payload type ID. """
         if self._payload_type_id is None:
-            payload_type_id_slice = slice(self.PAYLOAD_START,
-                                          self.PAYLOAD_START + 1)
-            payload_type_id_str = self.file_content[payload_type_id_slice]
-            self._payload_type_id = payload_type_id_str.decode(errors='replace')
+            self._payload_type_id = self.get_payload_type_id()
         return self._payload_type_id
 
     @property
     def sensor_type_id(self) -> Union[int, None]:
-        """ Determine sensor type id from an SBD message. """
+        """ Cache and return this message's sensor type ID. """
         if self._sensor_type_id is None:
-            if self.payload_type_id == '7':
-                sensor_type_slice = slice(self.PAYLOAD_START + 1,
-                                          self.PAYLOAD_START + 2)
-                self._sensor_type_id = ord(self.file_content[sensor_type_slice])
+            self._sensor_type_id = self.get_sensor_type_id()
         return self._sensor_type_id
 
     @property
     def sensor_type(self) -> SensorType:
-        """ Get sensor type class. """
+        """ Return sensor type class based on sensor type ID. """
         if self._sensor_type is None:
-            sensor_type = self.get_sensor_type_by_id()
+            sensor_type = self.get_sensor_type()
             self._sensor_type = sensor_type(self.file_content, self.file.name)
         return self._sensor_type
-
-    def get_sensor_type_by_id(self) -> Type[SensorType]:
-        """ Return sensor type class based on sensor type id. """
-        if self.sensor_type_id is None:
-            raise ValueError('Sensor type ID cannot be `None`.')
-        else:
-            return SENSOR_TYPES[self.sensor_type_id]
-
-    def validate_file_size(self) -> None:
-        """ Validate file size against the sensor type's expected size ."""
-        if self.file_size != self.sensor_type.expected_file_size:
-            raise ValueError(
-                f'Expected {self.sensor_type.expected_file_size} bytes, '
-                f'but received {self.file_size} bytes.'
-            )
 
     def read(self) -> tuple[dict, dict]:
         """
@@ -117,6 +97,40 @@ class SbdMessage:
             swift = {}
             error_message['error'] = self.file_content
         return swift, error_message
+
+    def get_payload_type_id(self) -> str:
+        """ Read and return the payload type ID from an SBD message. """
+        payload_type_id_slice = slice(self.PAYLOAD_START,
+                                      self.PAYLOAD_START + 1)
+        payload_type_id_str = self.file_content[payload_type_id_slice]
+        return payload_type_id_str.decode(errors='replace')
+
+    def get_sensor_type_id(self) -> Union[int, None]:
+        """ Read and return the sensor type ID from an SBD message. """
+        # Currently payload type ID 7 is the only payload type, but
+        # future versions may have more and/or no payload type.
+        if self.payload_type_id == '7':
+            sensor_type_slice = slice(self.PAYLOAD_START + 1,
+                                      self.PAYLOAD_START + 2)
+            sensor_type_id = ord(self.file_content[sensor_type_slice])
+        else:
+            sensor_type_id = None
+        return sensor_type_id
+
+    def get_sensor_type(self) -> Type[SensorType]:
+        """ Return sensor type class based on sensor type id. """
+        if self.sensor_type_id is None:
+            raise ValueError('Sensor type ID cannot be `None`.')
+        else:
+            return SENSOR_TYPES[self.sensor_type_id]
+
+    def validate_file_size(self) -> None:
+        """ Validate file size against the sensor type's expected size ."""
+        if self.file_size != self.sensor_type.expected_file_size:
+            raise ValueError(
+                f'Expected {self.sensor_type.expected_file_size} bytes, '
+                f'but received {self.file_size} bytes.'
+            )
 
 
 def _rstrip_null(bytestring):
