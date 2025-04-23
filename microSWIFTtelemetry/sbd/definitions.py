@@ -80,11 +80,21 @@ class SensorType(ABC):
 
 
 class SensorType52(SensorType):
-    definition = '<sbBheee42eee42b42b42b42b42Bffeeef'  # original v1 has `b` in third pos
+    # Sensor type 52 modified early 2025 ("Post" has 4 extra bytes.)
+    definition_pre_2025 = '<sbBheee42eee42b42b42b42b42Bffeeef'  # original v1 has `b` in third pos
+    definition_post_2025 = '<sbbheee42eee42b42b42b42b42BIIeeefI'
 
     def __init__(self, sbd_content: bytes, sbd_filename: str):
         self.sbd_content = sbd_content
         self.sbd_filename = sbd_filename
+
+    @property
+    def definition(self) -> str:
+        """ Return sensor type definition based on file size. """
+        if len(self.sbd_content) == struct.calcsize(self.definition_post_2025):
+            return self.definition_post_2025
+        else:
+            return self.definition_pre_2025
 
     @property
     def expected_file_size(self) -> int:
